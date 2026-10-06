@@ -1,0 +1,19 @@
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import App from './App';
+import '@fontsource/geist/latin-400.css';
+import '@fontsource/geist/latin-500.css';
+import '@fontsource/geist/latin-600.css';
+import '@fontsource/geist/latin-700.css';
+import '@fontsource/geist-mono/latin-400.css';
+import '@fontsource/geist-mono/latin-500.css';
+import './styles.css';
+
+document.documentElement.dataset.theme =
+  localStorage.getItem('cliproxy-theme') === 'light' ? 'light' : 'dark';
+
+ReactDOM.createRoot(document.getElementById('root')!).render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>,
+);

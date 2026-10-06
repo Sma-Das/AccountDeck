@@ -1,0 +1,45 @@
+{
+  "name": "accountdeck",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "concurrently -k \"node --watch server/index.js\" \"vite --host 127.0.0.1\"",
+    "build": "tsc -b && vite build",
+    "start": "node server/index.js",
+    "test": "node --test server/*.test.js",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "service:install": "node scripts/macos-service.mjs install",
+    "service:status": "node scripts/macos-service.mjs status",
+    "service:restart": "node scripts/macos-service.mjs restart",
+    "service:uninstall": "node scripts/macos-service.mjs uninstall",
+    "native:install": "node scripts/native-auth-service.mjs install",
+    "native:sync": "node scripts/native-auth-service.mjs sync",
+    "native:status": "node scripts/native-auth-service.mjs status",
+    "native:uninstall": "node scripts/native-auth-service.mjs uninstall"
+  },
+  "dependencies": {
+    "@fontsource/geist": "^5.3.0",
+    "@fontsource/geist-mono": "^5.3.0",
+    "express": "^5.1.0",
+    "lucide-react": "^0.468.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.1.0",
+    "@types/react-dom": "^19.1.0",
+    "@vitejs/plugin-react": "^4.5.0",
+    "concurrently": "^9.1.0",
+    "prettier": "^3.9.9",
+    "typescript": "^5.8.0",
+    "vite": "^6.3.0"
+  },
+  "overrides": {
+    "shell-quote": "^1.11.0"
+  }
+}

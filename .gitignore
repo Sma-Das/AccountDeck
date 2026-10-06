@@ -1,0 +1,14 @@
+node_modules/
+dist/
+.env*
+!.env.example
+*.local
+*.tsbuildinfo
+.DS_Store
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+build/
+.vercel/
+*.log
