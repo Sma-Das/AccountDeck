@@ -133,7 +133,7 @@ export function CursorUsage({
                         : 'Usage unavailable'}
                       {window.limitUsd !== null
                         ? ` of ${money(window.limitUsd)}`
-                        : ' · No spending limit reported'}
+                        : '. No spending limit reported.'}
                     </p>
                   )}
                 </div>
@@ -144,8 +144,8 @@ export function CursorUsage({
             )}
             {usage.updatedAt && (
               <p className="field-help">
-                Updated {new Date(usage.updatedAt).toLocaleTimeString()} ·
-                Billing reset {relative(usage.windows[0]?.resetsAt)}
+                Updated {new Date(usage.updatedAt).toLocaleTimeString()}.
+                Billing resets {relative(usage.windows[0]?.resetsAt)}.
               </p>
             )}
           </>

@@ -41,7 +41,7 @@ import {
   errorMessage as message,
 } from './types';
 import type { Account, Expiry, Page, Quota, Routing } from './types';
-import { Brand, Meter } from './components/ui';
+import { Brand, BrandMark, Meter } from './components/ui';
 import { ConnectionModal } from './components/ConnectionModal';
 import { AccountModal } from './components/AccountModal';
 import { OAuthModal } from './components/OAuthModal';
@@ -482,7 +482,7 @@ export default function App() {
             </strong>
             <span>
               {(view === 'cards' || sort !== 'provider') && (
-                <span>{info(account.provider).name} ·</span>
+                <span>{info(account.provider).name}</span>
               )}
               {account.quota?.plan || account.plan || 'OAuth account'}
               {account.nativeSource && (
@@ -670,7 +670,7 @@ export default function App() {
                   : reset
                     ? `Next reset ${relative(reset, now)}`
                     : 'No reset data'}
-                {!allHidden && hiddenCount > 0 && ` · ${hiddenCount} hidden`}
+                {!allHidden && hiddenCount > 0 && `, ${hiddenCount} hidden`}
               </div>
             </button>
           );
@@ -732,7 +732,7 @@ export default function App() {
       >
         <a className="brand" href="#overview" onClick={() => go('overview')}>
           <span className="brand-symbol">
-            <Terminal size={22} />
+            <BrandMark />
           </span>
           <div>
             <strong>AccountDeck</strong>
@@ -777,7 +777,7 @@ export default function App() {
                     : 'AI demo workspace'}
               </strong>
               <span className="local-badge">
-                {connected ? 'LIVE' : startupError ? 'OFFLINE' : 'DEMO'}
+                {connected ? 'Live' : startupError ? 'Offline' : 'Demo'}
               </span>
             </div>
             {connected && <p>{new URL(baseUrl).host}</p>}
@@ -892,7 +892,7 @@ export default function App() {
             <div className="section-heading">
               <h2>AI workspace</h2>
               <button className="text-button" onClick={() => go('quota')}>
-                Manage AI usage →
+                Manage AI usage
               </button>
             </div>
           )}
@@ -901,9 +901,7 @@ export default function App() {
               <div className="quota-meta">
                 <span className="mono">
                   <span className="status-dot" />
-                  {accounts.length} accounts
-                  <span className="dot-separator">·</span>
-                  <span className="subtle">{loaded} quotas loaded</span>
+                  {loaded} of {accounts.length} accounts reporting quota
                 </span>
                 <div>
                   <span className="last-sync">
@@ -938,7 +936,7 @@ export default function App() {
                   </h2>
                 </div>
                 <div className="expiry-control">
-                  <span>Auto-prioritize · 15m</span>
+                  <span>Auto-prioritize expiring quota</span>
                   <button
                     className={`switch ${expiry.enabled ? 'on' : ''}`}
                     role="switch"
@@ -972,7 +970,7 @@ export default function App() {
               </div>
               <p id="expiry-help" className="expiry-help">
                 {connected
-                  ? 'Prefer unused Claude, Codex, and Grok Build quota in the last 15 minutes.'
+                  ? 'Route to Claude, Codex, and Grok Build accounts with unused quota in the 15 minutes before reset.'
                   : 'Connect your proxy to auto-prioritize expiring quota.'}
                 {expiry.boosted.length > 0 &&
                   ` ${expiry.boosted.length} prioritized.`}

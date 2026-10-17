@@ -1,61 +1,70 @@
 :root {
   color-scheme: dark;
   font-family:
-    'Geist',
+    'Barlow',
     -apple-system,
     BlinkMacSystemFont,
     'Segoe UI',
     sans-serif;
   font-synthesis: none;
+  font-variant-numeric: tabular-nums;
   -webkit-font-smoothing: antialiased;
-  --bg: #0a0a0b;
-  --sidebar: #101011;
-  --panel: #111113;
-  --hover: #18181b;
-  --raised: #19191c;
-  --text: #ededee;
-  --subtle: #98989f;
-  --muted: #85858e;
-  --line: #252528;
-  --line-strong: #39393f;
-  --primary: #eeeeef;
-  --primary-text: #151517;
-  --accent: #b9a1fa;
-  --accent-bg: #211b30;
-  --green: #58cfa0;
-  --green-bg: #13261f;
-  --yellow: #dbb46d;
-  --yellow-bg: #2a2418;
-  --red: #f49c9c;
-  --red-bg: #2b191b;
-  --claude: #d9957a;
-  --codex: #a6b9ef;
+  /* Night panel. Colour carries state only, after cockpit display practice:
+     green normal, amber caution, red warning, cyan selectable. */
+  --bg: #171b21;
+  --sidebar: #13171c;
+  --panel: #1d2229;
+  --hover: #232931;
+  --raised: #29303a;
+  --text: #e9ecef;
+  --subtle: #a7b0bc;
+  --muted: #8a94a1;
+  --line: #2b323c;
+  --line-strong: #3b4451;
+  --primary: #7cc8ec;
+  --primary-text: #0f2633;
+  --accent: #7cc8ec;
+  --accent-bg: #1b2e3a;
+  --green: #6fd4a4;
+  --green-bg: #17302a;
+  --yellow: #f0b54d;
+  --yellow-bg: #33291a;
+  --red: #f2877d;
+  --red-bg: #37201f;
+  --cell-off: #2a313b;
+  --claude: #e09a7d;
+  --codex: #a9bcf0;
+  --display: 'Barlow Semi Condensed', 'Barlow', sans-serif;
   --mono: 'Geist Mono', 'SFMono-Regular', Consolas, monospace;
+  --radius: 3px;
+  --radius-panel: 6px;
 }
 :root[data-theme='light'] {
   color-scheme: light;
-  --bg: #fafafa;
-  --sidebar: #f6f6f7;
-  --panel: #fff;
-  --hover: #f4f4f5;
-  --raised: #f0f0f2;
-  --text: #19191b;
-  --subtle: #66666e;
-  --muted: #73737d;
-  --line: #e4e4e7;
-  --line-strong: #d0d0d5;
-  --primary: #1b1b1e;
+  /* Day panel: brushed aluminium with printed-ink text. */
+  --bg: #e8ebee;
+  --sidebar: #dfe3e7;
+  --panel: #f6f7f8;
+  --hover: #eceff2;
+  --raised: #e2e6ea;
+  --text: #182029;
+  --subtle: #4f5b68;
+  --muted: #5f6b78;
+  --line: #d1d7dd;
+  --line-strong: #b4bdc6;
+  --primary: #1b6a90;
   --primary-text: #fff;
-  --accent: #7251bc;
-  --accent-bg: #eee8fa;
-  --green: #16805a;
-  --green-bg: #e6f5ed;
-  --yellow: #926717;
-  --yellow-bg: #fcf4e4;
-  --red: #b93838;
-  --red-bg: #ffeded;
-  --claude: #aa5336;
-  --codex: #526fb6;
+  --accent: #1b6a90;
+  --accent-bg: #dcebf3;
+  --green: #187a52;
+  --green-bg: #dcefe5;
+  --yellow: #8a5800;
+  --yellow-bg: #f6ead2;
+  --red: #b23a30;
+  --red-bg: #f8e1de;
+  --cell-off: #d3d9df;
+  --claude: #a6512f;
+  --codex: #4a67ad;
 }
 * {
   box-sizing: border-box;
@@ -64,8 +73,13 @@ body {
   margin: 0;
   background: var(--bg);
   color: var(--text);
-  font-size: 13px;
+  font-size: 14px;
   line-height: 1.5;
+}
+h1,
+.summary-value,
+.health-value {
+  font-family: var(--display);
 }
 button,
 input,
@@ -90,7 +104,7 @@ button {
   justify-content: center;
   gap: 8px;
   border: 1px solid transparent;
-  border-radius: 6px;
+  border-radius: var(--radius);
   background: transparent;
   transition:
     background 0.15s,
@@ -119,7 +133,7 @@ select {
   color: var(--text);
   background: var(--bg);
   border: 1px solid var(--line-strong);
-  border-radius: 6px;
+  border-radius: var(--radius);
   padding: 10px 11px;
   width: 100%;
   min-width: 0;
@@ -142,17 +156,16 @@ p {
   margin: 0;
 }
 h2 {
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 600;
-  letter-spacing: -0.15px;
 }
 h3 {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 550;
 }
 p {
   color: var(--subtle);
-  font-size: 12px;
+  font-size: 13px;
   line-height: 1.7;
 }
 code,
@@ -171,7 +184,7 @@ svg {
   padding: 10px 14px;
   background: var(--primary);
   color: var(--primary-text);
-  border-radius: 6px;
+  border-radius: var(--radius);
 }
 .skip-link:focus {
   top: 12px;
@@ -216,36 +229,36 @@ svg {
   padding: 0 8px;
 }
 .brand-symbol {
-  background: var(--raised);
-  border: 1px solid var(--line-strong);
-  width: 32px;
-  height: 32px;
-  color: var(--text);
-  border-radius: 8px;
+  width: 30px;
+  height: 30px;
   display: grid;
   place-items: center;
 }
+.brand-symbol svg {
+  width: 30px;
+  height: 30px;
+}
 .brand strong {
-  font-size: 19px;
-  font-weight: 650;
-  letter-spacing: -0.7px;
+  font-family: var(--display);
+  font-size: 21px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
   display: flex;
   align-items: center;
   gap: 15px;
 }
 .brand-label {
-  font-family: var(--mono);
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 400;
   letter-spacing: 0;
   padding: 1px 4px;
   color: var(--muted);
   border: 1px solid var(--line);
-  border-radius: 4px;
+  border-radius: var(--radius);
 }
 .brand > div > span {
   color: var(--subtle);
-  font-size: 10px;
+  font-size: 11px;
   display: block;
   margin-top: 1px;
 }
@@ -256,14 +269,14 @@ svg {
   border: 1px solid var(--line);
   padding: 11px 9px;
   margin: 5px 2px 27px;
-  border-radius: 7px;
+  border-radius: var(--radius-panel);
 }
 .workspace-icon {
   width: 27px;
   height: 27px;
   background: var(--accent-bg);
   color: var(--accent);
-  border-radius: 6px;
+  border-radius: var(--radius);
   display: grid;
   place-items: center;
   flex-shrink: 0;
@@ -272,12 +285,12 @@ svg {
   flex: 1;
 }
 .workspace strong {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 550;
   display: block;
 }
 .workspace div > span {
-  font-size: 10px;
+  font-size: 11px;
   color: var(--muted);
   display: block;
   margin-top: 2px;
@@ -287,7 +300,7 @@ svg {
 }
 .nav-label {
   color: var(--muted);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 500;
   padding: 0 12px;
   margin-bottom: 9px;
@@ -302,7 +315,7 @@ svg {
   justify-content: flex-start;
   padding: 10px 12px;
   color: var(--subtle);
-  font-size: 13px;
+  font-size: 14px;
   text-align: left;
 }
 .sidebar nav button > svg {
@@ -314,8 +327,9 @@ svg {
 }
 .sidebar nav button.active {
   color: var(--text);
-  background: var(--raised);
-  border-color: var(--line);
+  background: var(--hover);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  box-shadow: inset 2px 0 var(--accent);
 }
 .sidebar nav button.active svg {
   color: var(--accent);
@@ -324,7 +338,7 @@ svg {
   flex: 1;
 }
 .sidebar nav button small {
-  font-size: 10px;
+  font-size: 11px;
   color: var(--subtle);
   font-variant-numeric: tabular-nums;
 }
@@ -339,7 +353,7 @@ svg {
 .gateway-card {
   padding: 13px 11px;
   border: 1px solid var(--line);
-  border-radius: 7px;
+  border-radius: var(--radius-panel);
   margin-bottom: 15px;
 }
 .gateway-card > div {
@@ -348,26 +362,25 @@ svg {
   gap: 7px;
 }
 .gateway-card strong {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 500;
   flex: 1;
 }
 .local-badge {
-  font-family: var(--mono);
-  font-size: 8px;
+  font-size: 11px;
   border: 1px solid var(--line-strong);
   color: var(--muted);
   padding: 1px 4px;
-  border-radius: 3px;
+  border-radius: var(--radius);
 }
 .gateway-card p {
-  font-size: 10px;
+  font-size: 11px;
   margin: 7px 0;
   color: var(--muted);
   overflow-wrap: anywhere;
 }
 .gateway-card button {
-  font-size: 10px;
+  font-size: 11px;
   padding: 3px 0;
   color: var(--subtle);
   justify-content: space-between;
@@ -382,7 +395,7 @@ svg {
   align-items: center;
   gap: 8px;
   padding: 7px 0;
-  font-size: 11px;
+  font-size: 12px;
   color: var(--subtle);
 }
 .sidebar-link > svg:last-child {
@@ -392,7 +405,7 @@ svg {
   display: flex;
   gap: 8px;
   color: var(--subtle);
-  font-size: 10px;
+  font-size: 11px;
   margin-top: 22px;
   line-height: 1.6;
 }
@@ -412,7 +425,7 @@ svg {
   border-top: 1px solid var(--line);
   margin-top: 20px;
   padding-top: 12px;
-  font-size: 10px;
+  font-size: 11px;
   color: var(--muted);
 }
 .main-shell {
@@ -433,7 +446,7 @@ svg {
   display: flex;
   align-items: center;
   gap: 13px;
-  font-size: 12px;
+  font-size: 13px;
   color: var(--muted);
 }
 .breadcrumb strong {
@@ -447,7 +460,7 @@ svg {
   display: flex;
   align-items: center;
   gap: 17px;
-  font-size: 11px;
+  font-size: 12px;
   color: var(--subtle);
 }
 .topbar-right a {
@@ -494,7 +507,7 @@ main:focus {
 }
 .eyebrow {
   color: var(--muted);
-  font-size: 10px;
+  font-size: 11px;
   margin-bottom: 8px;
 }
 .heading-row {
@@ -507,13 +520,13 @@ main:focus {
   margin-bottom: 27px;
 }
 .page-heading h1 {
-  font-size: 28px;
-  letter-spacing: -1px;
-  line-height: 1.3;
+  font-size: 34px;
+  letter-spacing: 0;
+  line-height: 1.15;
   font-weight: 600;
 }
 .page-heading p {
-  font-size: 13px;
+  font-size: 14px;
   margin-top: 7px;
 }
 .primary {
@@ -523,9 +536,9 @@ main:focus {
   gap: 8px;
   background: var(--primary);
   border: 1px solid var(--primary);
-  border-radius: 6px;
+  border-radius: var(--radius);
   color: var(--primary-text);
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 500;
   padding: 8px 12px;
   min-height: 35px;
@@ -540,7 +553,7 @@ main:focus {
   border: 1px solid var(--line-strong);
   background: var(--panel);
   padding: 8px 12px;
-  font-size: 12px;
+  font-size: 13px;
   min-height: 34px;
   white-space: nowrap;
 }
@@ -550,10 +563,10 @@ main:focus {
 .secondary.compact {
   padding: 6px 10px;
   min-height: 30px;
-  font-size: 11px;
+  font-size: 12px;
 }
 .text-button {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--subtle);
   padding: 4px 0;
 }
@@ -566,7 +579,7 @@ main:focus {
   height: 30px;
   padding: 0;
   color: var(--subtle);
-  border-radius: 5px;
+  border-radius: var(--radius);
   flex-shrink: 0;
 }
 .icon-button:hover {
@@ -575,13 +588,13 @@ main:focus {
 }
 .demo-banner {
   border-bottom: 1px solid var(--line);
-  background: var(--accent-bg);
+  background: var(--yellow-bg);
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 15px;
   padding: 11px 34px;
-  font-size: 11px;
+  font-size: 12px;
 }
 .demo-banner > span {
   display: flex;
@@ -590,17 +603,17 @@ main:focus {
   color: var(--subtle);
 }
 .demo-banner strong {
-  color: var(--accent);
-  font-size: 10px;
-  font-weight: 400;
-  border: 1px solid var(--accent);
-  border-radius: 4px;
+  color: var(--yellow);
+  font-size: 11px;
+  font-weight: 600;
+  border: 1px solid var(--yellow);
+  border-radius: var(--radius);
   padding: 1px 6px;
 }
 .demo-banner button {
-  color: var(--accent);
+  color: var(--text);
   white-space: nowrap;
-  font-size: 11px;
+  font-size: 12px;
   padding: 2px 0;
 }
 .demo-banner button:hover {
@@ -618,7 +631,7 @@ main:focus {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 11px;
+  font-size: 12px;
   color: var(--subtle);
   font-family: inherit;
 }
@@ -635,14 +648,14 @@ main:focus {
   color: var(--muted);
 }
 .last-sync {
-  font-size: 10px;
+  font-size: 11px;
   color: var(--muted);
 }
 .provider-summary {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   border: 1px solid var(--line);
-  border-radius: 8px;
+  border-radius: var(--radius-panel);
   background: var(--panel);
   overflow: hidden;
 }
@@ -673,14 +686,14 @@ main:focus {
   margin-bottom: 18px;
 }
 .summary-heading > span {
-  font-size: 12px;
+  font-size: 13px;
   display: flex;
   gap: 7px;
   align-items: center;
   font-weight: 500;
 }
 .summary-heading small {
-  font-size: 10px;
+  font-size: 11px;
   color: var(--muted);
 }
 .provider-mark {
@@ -718,7 +731,7 @@ main:focus {
 }
 .provider-mark.kimi {
   border: 1px solid var(--line-strong);
-  border-radius: 5px;
+  border-radius: var(--radius);
   color: var(--text);
   width: 28px;
   height: 28px;
@@ -729,27 +742,28 @@ main:focus {
 .provider-mark.kimi.small {
   width: 17px;
   height: 17px;
-  font-size: 13px;
-  border-radius: 3px;
+  font-size: 14px;
+  border-radius: var(--radius);
 }
 .provider-mark.antigravity {
   font-weight: 800;
 }
 .summary-label {
   color: var(--subtle);
-  font-size: 11px;
+  font-size: 12px;
 }
 .summary-value {
-  font-size: 29px;
-  font-weight: 550;
-  letter-spacing: -1px;
-  margin: 5px 0 14px;
-  line-height: 1.2;
+  font-size: 42px;
+  font-weight: 500;
+  letter-spacing: 0;
+  margin: 2px 0 12px;
+  line-height: 1.05;
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
 }
 .summary-value > span {
-  font-size: 11px;
+  font-family: 'Barlow', sans-serif;
+  font-size: 13px;
   letter-spacing: 0;
   font-weight: 400;
   color: var(--muted);
@@ -757,19 +771,28 @@ main:focus {
 }
 .segments {
   display: flex;
-  gap: 4px;
+  gap: 8px;
 }
-.track {
-  height: 4px;
-  background: var(--line);
-  border-radius: 3px;
+/* Quota meters are lit cell bars, read like a level meter. */
+.track,
+.health-bar {
+  height: 10px;
+  background: var(--cell-off);
+  border-radius: 0;
   overflow: hidden;
   width: 100%;
+  -webkit-mask: repeating-linear-gradient(
+    90deg,
+    #000 0 4px,
+    transparent 4px 6px
+  );
+  mask: repeating-linear-gradient(90deg, #000 0 4px, transparent 4px 6px);
 }
 .track > span {
   display: block;
   height: 100%;
-  border-radius: 3px;
+  border-radius: 0;
+  transition: width 0.4s ease-out;
 }
 .track .green {
   background: var(--green);
@@ -784,7 +807,7 @@ main:focus {
   background: var(--muted);
 }
 .summary-reset {
-  font-size: 10px;
+  font-size: 11px;
   color: var(--muted);
   display: flex;
   gap: 5px;
@@ -794,7 +817,7 @@ main:focus {
 .quota-section {
   margin-top: 28px;
   border: 1px solid var(--line);
-  border-radius: 8px;
+  border-radius: var(--radius-panel);
   background: var(--panel);
   overflow: hidden;
 }
@@ -803,7 +826,13 @@ main:focus {
   align-items: center;
   justify-content: space-between;
   gap: 16px;
+}
+.quota-section > .section-heading {
   padding: 20px 20px 0;
+}
+main > .section-heading,
+.github-workspace > .section-heading {
+  margin: 30px 0 12px;
 }
 .section-heading p {
   color: var(--muted);
@@ -814,12 +843,12 @@ main:focus {
   align-items: center;
   gap: 10px;
   color: var(--subtle);
-  font-size: 11px;
+  font-size: 12px;
 }
 .expiry-help,
 .expiry-error {
   margin: 10px 20px 0;
-  font-size: 11px;
+  font-size: 12px;
 }
 .expiry-error {
   color: var(--red);
@@ -837,9 +866,9 @@ main:focus {
   min-width: 18px;
   height: 16px;
   border: 1px solid var(--line);
-  border-radius: 4px;
+  border-radius: var(--radius);
   color: var(--subtle);
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 400;
   margin-left: 8px;
   padding: 0 4px;
@@ -861,11 +890,11 @@ main:focus {
   padding: 4px 0;
 }
 .provider-tabs > button {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--subtle);
   padding: 5px 8px;
   white-space: nowrap;
-  border-radius: 5px;
+  border-radius: var(--radius);
   gap: 6px;
 }
 .provider-tabs > button:hover {
@@ -880,8 +909,8 @@ main:focus {
   background: var(--hover);
   color: var(--muted);
   padding: 0 4px;
-  font-size: 9px;
-  border-radius: 3px;
+  font-size: 10px;
+  border-radius: var(--radius);
 }
 .provider-tabs .provider-mark.small {
   width: 15px;
@@ -889,7 +918,7 @@ main:focus {
   font-size: 16px;
 }
 .provider-tabs .provider-mark.kimi.small {
-  font-size: 11px;
+  font-size: 12px;
 }
 .view-selector {
   display: flex;
@@ -902,7 +931,7 @@ main:focus {
   padding: 6px 28px 6px 9px;
   border-color: var(--line);
   background: var(--panel);
-  font-size: 11px;
+  font-size: 12px;
   width: 118px;
 }
 .view-selector > svg {
@@ -930,7 +959,7 @@ main:focus {
   gap: 7px;
   color: var(--muted);
   border: 1px solid var(--line);
-  border-radius: 5px;
+  border-radius: var(--radius);
   padding: 7px 9px;
   width: 230px;
   min-width: 0;
@@ -945,7 +974,7 @@ main:focus {
   border: 0;
   border-radius: 0;
   padding: 0;
-  font-size: 11px;
+  font-size: 12px;
   width: 100%;
 }
 .search-field input:focus {
@@ -960,7 +989,7 @@ main:focus {
 .sort-control select {
   border-color: var(--line);
   background: var(--panel);
-  font-size: 11px;
+  font-size: 12px;
   padding: 6px;
   color: var(--subtle);
   width: 142px;
@@ -973,7 +1002,7 @@ main:focus {
   align-items: center;
   justify-content: space-between;
   padding: 11px 20px;
-  background: var(--hover);
+  background: var(--bg);
   border-bottom: 1px solid var(--line);
   border-top: 1px solid var(--line);
 }
@@ -984,17 +1013,17 @@ main:focus {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 500;
 }
 .group-heading h2 > span:last-child {
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 400;
   color: var(--muted);
   margin-left: 2px;
 }
 .group-heading > span {
-  font-size: 10px;
+  font-size: 11px;
   color: var(--muted);
   padding-right: 74px;
 }
@@ -1016,7 +1045,7 @@ main:focus {
   min-width: 0;
   padding: 4px 0;
   background: transparent;
-  border-radius: 3px;
+  border-radius: var(--radius);
 }
 .account-identity:hover {
   background: transparent;
@@ -1029,9 +1058,8 @@ main:focus {
 }
 .account-identity strong {
   display: block;
-  font-family: var(--mono);
-  font-size: 11px;
-  font-weight: 400;
+  font-size: 14px;
+  font-weight: 500;
   color: var(--text);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1043,13 +1071,13 @@ main:focus {
   gap: 7px;
   flex-wrap: wrap;
   color: var(--muted);
-  font-size: 11px;
+  font-size: 12px;
   margin-top: 5px;
 }
 .priority-label {
-  font-size: 9px;
+  font-size: 10px;
   background: var(--raised);
-  border-radius: 3px;
+  border-radius: var(--radius);
   padding: 1px 5px;
   color: var(--subtle);
 }
@@ -1071,7 +1099,7 @@ main:focus {
   align-items: center;
   justify-content: space-between;
   gap: 6px;
-  font-size: 10px;
+  font-size: 11px;
   color: var(--subtle);
   margin-bottom: 8px;
 }
@@ -1081,8 +1109,9 @@ main:focus {
   white-space: nowrap;
 }
 .meter-top strong {
-  font-size: 11px;
-  font-weight: 500;
+  font-family: var(--display);
+  font-size: 16px;
+  font-weight: 600;
   font-variant-numeric: tabular-nums;
 }
 .meter-top strong.green {
@@ -1098,7 +1127,7 @@ main:focus {
   color: var(--muted);
 }
 .reset-label {
-  font-size: 10px;
+  font-size: 11px;
   color: var(--muted);
   margin-top: 7px;
   overflow-wrap: anywhere;
@@ -1114,7 +1143,7 @@ main:focus {
 }
 .quota-missing {
   grid-column: 1/-1;
-  font-size: 11px;
+  font-size: 12px;
   color: var(--subtle);
   display: flex;
   flex-direction: column;
@@ -1122,12 +1151,12 @@ main:focus {
   overflow-wrap: anywhere;
 }
 .quota-missing small {
-  font-size: 10px;
+  font-size: 11px;
   color: var(--muted);
 }
 .row-warning {
   grid-column: 2/-1;
-  font-size: 10px;
+  font-size: 11px;
   color: var(--yellow);
   line-height: 1.5;
   margin-top: -8px;
@@ -1143,7 +1172,7 @@ main:focus {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-size: 10px;
+  font-size: 11px;
   color: var(--muted);
   padding: 12px 20px;
   gap: 15px;
@@ -1161,7 +1190,7 @@ main:focus {
   margin-top: 28px;
   padding: 0 0 22px;
   color: var(--muted);
-  font-size: 10px;
+  font-size: 11px;
 }
 .main-footer > span:last-child,
 .main-footer a {
@@ -1198,7 +1227,7 @@ main:focus {
 .account-cards .account-row {
   grid-template-columns: minmax(0, 1fr) auto;
   border: 1px solid var(--line);
-  border-radius: 8px;
+  border-radius: var(--radius-panel);
   padding: 18px;
   gap: 18px;
   background: var(--panel);
@@ -1218,7 +1247,7 @@ main:focus {
 .panel {
   border: 1px solid var(--line);
   background: var(--panel);
-  border-radius: 8px;
+  border-radius: var(--radius-panel);
   padding: 22px;
   min-width: 0;
 }
@@ -1233,7 +1262,7 @@ main:focus {
   color: var(--muted);
 }
 .panel p {
-  font-size: 12px;
+  font-size: 13px;
 }
 .overview-grid {
   display: grid;
@@ -1245,22 +1274,19 @@ main:focus {
   grid-column: 1/-1;
 }
 .health-value {
-  font-size: 34px;
-  letter-spacing: -1px;
+  font-size: 44px;
+  font-weight: 500;
+  line-height: 1.05;
+  letter-spacing: 0;
   margin: 18px 0;
   font-variant-numeric: tabular-nums;
 }
 .health-value > span {
-  font-size: 13px;
+  font-family: 'Barlow', sans-serif;
+  font-size: 14px;
   color: var(--subtle);
   letter-spacing: 0;
   margin-left: 6px;
-}
-.health-bar {
-  height: 6px;
-  background: var(--line);
-  border-radius: 4px;
-  overflow: hidden;
 }
 .health-bar span {
   height: 100%;
@@ -1272,7 +1298,7 @@ main:focus {
   flex-wrap: wrap;
   gap: 15px;
   margin: 15px 0 23px;
-  font-size: 11px;
+  font-size: 12px;
   color: var(--subtle);
 }
 .health-legend > span {
@@ -1302,13 +1328,13 @@ main:focus {
   gap: 15px;
 }
 .section-intro h2 > span {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 400;
   color: var(--muted);
   margin-left: 10px;
 }
 .section-intro > span {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--muted);
 }
 .provider-grid {
@@ -1319,7 +1345,7 @@ main:focus {
 .provider-panel {
   border: 1px solid var(--line);
   background: var(--panel);
-  border-radius: 8px;
+  border-radius: var(--radius-panel);
   padding: 20px;
   display: flex;
   flex-direction: column;
@@ -1337,15 +1363,15 @@ main:focus {
   flex: 1;
 }
 .provider-panel-heading p {
-  font-size: 11px;
+  font-size: 12px;
   margin-top: 3px;
 }
 .badge {
   padding: 3px 7px;
-  border-radius: 4px;
+  border-radius: var(--radius);
   background: var(--raised);
   color: var(--subtle);
-  font-size: 10px;
+  font-size: 11px;
   white-space: nowrap;
 }
 .badge.green {
@@ -1363,8 +1389,7 @@ main:focus {
   display: flex;
   gap: 8px;
   padding: 11px 0;
-  font-family: var(--mono);
-  font-size: 11px;
+  font-size: 13px;
   text-align: left;
   border: 0;
   border-bottom: 1px solid var(--line);
@@ -1379,8 +1404,7 @@ main:focus {
   white-space: nowrap;
 }
 .provider-accounts button small {
-  font-family: 'Geist', sans-serif;
-  font-size: 10px;
+  font-size: 11px;
   color: var(--muted);
 }
 .provider-accounts button svg,
@@ -1388,7 +1412,7 @@ main:focus {
   color: var(--muted);
 }
 .provider-accounts p {
-  font-size: 12px;
+  font-size: 13px;
   padding: 15px 0;
 }
 .provider-panel > .secondary {
@@ -1401,7 +1425,7 @@ main:focus {
   background: var(--hover);
   border: 1px solid var(--line);
   padding: 13px;
-  border-radius: 6px;
+  border-radius: var(--radius);
   margin-top: 22px;
 }
 .note svg {
@@ -1409,7 +1433,7 @@ main:focus {
   margin-top: 2px;
 }
 .note p {
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1.7;
   color: var(--subtle);
 }
@@ -1423,7 +1447,7 @@ main:focus {
 }
 .strategy-option {
   border: 1px solid var(--line);
-  border-radius: 6px;
+  border-radius: var(--radius);
   display: flex;
   gap: 12px;
   align-items: center;
@@ -1449,11 +1473,11 @@ main:focus {
   gap: 5px;
 }
 .strategy-option strong {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 500;
 }
 .strategy-option small {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--subtle);
   line-height: 1.5;
 }
@@ -1502,7 +1526,7 @@ main:focus {
   gap: 10px;
 }
 .panel-actions > span {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--muted);
 }
 .priority-list {
@@ -1518,7 +1542,7 @@ main:focus {
   margin: 0 0 20px;
 }
 .client-tabs button {
-  font-size: 12px;
+  font-size: 13px;
   border: 1px solid var(--line);
   padding: 8px 13px;
   color: var(--subtle);
@@ -1539,7 +1563,7 @@ main:focus {
 .readonly-input {
   border: 1px solid var(--line-strong);
   background: var(--bg);
-  border-radius: 6px;
+  border-radius: var(--radius);
   display: flex;
   align-items: center;
   gap: 8px;
@@ -1547,7 +1571,7 @@ main:focus {
   margin-top: 9px;
 }
 .readonly-input code {
-  font-size: 11px;
+  font-size: 12px;
   flex: 1;
   min-width: 0;
   overflow-wrap: anywhere;
@@ -1561,7 +1585,7 @@ main:focus {
 }
 .code-block {
   border: 1px solid var(--line);
-  border-radius: 6px;
+  border-radius: var(--radius);
   background: var(--bg);
   overflow: hidden;
   margin: 15px 0;
@@ -1574,12 +1598,12 @@ main:focus {
   padding: 8px 12px;
   color: var(--muted);
   font-family: var(--mono);
-  font-size: 10px;
+  font-size: 11px;
 }
 .code-block pre {
   margin: 0;
   padding: 16px;
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1.9;
   overflow: auto;
   white-space: pre-wrap;
@@ -1589,13 +1613,13 @@ main:focus {
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 11px;
+  font-size: 12px;
   color: var(--subtle);
   margin-top: 21px;
   line-height: 1.6;
 }
 .field-help {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--muted);
   line-height: 1.7;
   margin-top: 10px;
@@ -1611,10 +1635,10 @@ main:focus {
   background: var(--panel);
   border: 1px solid var(--line-strong);
   box-shadow: 0 10px 40px #0003;
-  border-radius: 8px;
+  border-radius: var(--radius-panel);
   padding: 12px 13px;
   color: var(--text);
-  font-size: 12px;
+  font-size: 13px;
   max-width: calc(100vw - 264px);
   width: max-content;
   z-index: 50;
@@ -1661,7 +1685,7 @@ main:focus {
 dialog {
   padding: 0;
   border: 1px solid var(--line-strong);
-  border-radius: 12px;
+  border-radius: 8px;
   background: var(--panel);
   color: var(--text);
   max-width: 490px;
@@ -1684,17 +1708,18 @@ dialog::backdrop {
   margin-bottom: 12px;
 }
 .modal-heading h2 {
-  font-size: 20px;
-  letter-spacing: -0.5px;
+  font-family: var(--display);
+  font-size: 24px;
+  font-weight: 600;
 }
 .modal-description {
-  font-size: 12px;
+  font-size: 13px;
   margin-bottom: 24px;
 }
 .modal label,
 .setup-layout label {
   display: block;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 500;
 }
 .modal label > input,
@@ -1702,7 +1727,7 @@ dialog::backdrop {
 .setup-layout label > input,
 .setup-layout label > select {
   margin-top: 8px;
-  font-size: 12px;
+  font-size: 13px;
 }
 .modal label + label {
   margin-top: 20px;
@@ -1727,10 +1752,10 @@ dialog::backdrop {
 .form-error {
   border: 1px solid var(--red);
   background: var(--red-bg);
-  border-radius: 5px;
+  border-radius: var(--radius);
   padding: 12px;
   color: var(--red);
-  font-size: 11px;
+  font-size: 12px;
   margin-top: 18px;
   overflow-wrap: anywhere;
 }
@@ -1745,13 +1770,12 @@ dialog::backdrop {
   min-width: 0;
 }
 .modal-account strong {
-  font-family: var(--mono);
-  font-size: 12px;
-  font-weight: 400;
+  font-size: 14px;
+  font-weight: 500;
   overflow-wrap: anywhere;
 }
 .modal-account p {
-  font-size: 11px;
+  font-size: 12px;
   margin-top: 4px;
 }
 .connect-first {
@@ -1765,7 +1789,7 @@ dialog::backdrop {
   margin: 16px 0 10px;
 }
 .connect-first p {
-  font-size: 12px;
+  font-size: 13px;
   max-width: 330px;
   margin: 0 auto 20px;
 }
@@ -1786,7 +1810,7 @@ dialog::backdrop {
   align-items: center;
   justify-content: center;
   gap: 6px;
-  font-size: 11px;
+  font-size: 12px;
   color: var(--subtle);
   margin-top: 18px;
 }
@@ -1796,7 +1820,7 @@ dialog::backdrop {
 details {
   border-top: 1px solid var(--line);
   padding-top: 18px;
-  font-size: 12px;
+  font-size: 13px;
 }
 summary {
   cursor: pointer;
@@ -1823,7 +1847,7 @@ details label {
     padding-bottom: 20px;
   }
   .meter-top {
-    font-size: 11px;
+    font-size: 12px;
   }
 }
 @media (max-width: 1100px) {
@@ -1918,7 +1942,7 @@ details label {
   }
   .breadcrumb {
     gap: 8px;
-    font-size: 11px;
+    font-size: 12px;
   }
   .breadcrumb > span {
     display: none;
@@ -1955,7 +1979,7 @@ details label {
     margin-top: 0;
   }
   .page-heading p {
-    font-size: 12px;
+    font-size: 13px;
   }
   .last-sync {
     display: none;
@@ -1978,21 +2002,23 @@ details label {
     font-size: 27px;
   }
   .summary-value > span {
-    font-size: 10px;
+    font-size: 11px;
     margin-left: 5px;
   }
   .summary-heading {
     margin-bottom: 14px;
   }
   .summary-heading small {
-    font-size: 9px;
-  }
-  .summary-reset {
     font-size: 10px;
   }
+  .summary-reset {
+    font-size: 11px;
+  }
   .section-heading {
-    padding: 18px 16px 0;
     flex-wrap: wrap;
+  }
+  .quota-section > .section-heading {
+    padding: 18px 16px 0;
   }
   .expiry-help,
   .expiry-error {
@@ -2051,7 +2077,7 @@ details label {
     gap: 14px;
   }
   .main-footer {
-    font-size: 9px;
+    font-size: 10px;
   }
   .main-footer .dot-separator,
   .main-footer a {
@@ -2081,7 +2107,7 @@ details label {
     gap: 10px;
   }
   .demo-banner button {
-    font-size: 10px;
+    font-size: 11px;
   }
   .summary-heading {
     flex-wrap: wrap;
@@ -2091,13 +2117,13 @@ details label {
     margin: 4px 0 0;
   }
   .summary-reset {
-    font-size: 9px;
-  }
-  .summary-label {
     font-size: 10px;
   }
+  .summary-label {
+    font-size: 11px;
+  }
   .group-heading > span {
-    font-size: 9px;
+    font-size: 10px;
   }
   .provider-panel-heading > .badge {
     margin-left: 45px;
@@ -2106,7 +2132,7 @@ details label {
     gap: 5px;
   }
   .client-tabs button {
-    font-size: 11px;
+    font-size: 12px;
     padding: 8px 10px;
   }
 }
@@ -2127,7 +2153,7 @@ details label {
   min-width: 0;
 }
 .limit-options legend {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
   margin-bottom: 8px;
 }
@@ -2156,14 +2182,14 @@ details label {
   gap: 8px;
 }
 .cursor-usage h2 {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
 }
 .cursor-usage .badge {
   margin-left: auto;
 }
 .cursor-usage p {
-  font-size: 12px;
+  font-size: 13px;
   line-height: 1.6;
   margin: 18px 0;
 }
@@ -2189,13 +2215,13 @@ details label {
   margin: 18px 0;
 }
 .cursor-usage .field-help {
-  font-size: 11px;
+  font-size: 12px;
   margin: 8px 0;
 }
 .cursor-instructions {
   margin: 18px 0;
   padding-left: 20px;
-  font-size: 12px;
+  font-size: 13px;
   line-height: 1.7;
 }
 .cursor-instructions li + li {
@@ -2219,7 +2245,7 @@ details label {
   flex-wrap: wrap;
 }
 .computer-picker {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--subtle);
   flex-wrap: wrap;
 }
@@ -2227,7 +2253,7 @@ details label {
 .github-workspace input {
   min-height: 36px;
   border: 1px solid var(--line-strong);
-  border-radius: 6px;
+  border-radius: var(--radius);
   padding: 7px 10px;
   color: var(--text);
   background: var(--raised);
@@ -2236,7 +2262,7 @@ details label {
 .github-scope,
 .github-help {
   color: var(--subtle);
-  font-size: 12px;
+  font-size: 13px;
   line-height: 1.7;
   margin: 14px 0 20px;
 }
@@ -2244,10 +2270,10 @@ details label {
   background: var(--red-bg);
   border: 1px solid var(--line-strong);
   padding: 16px;
-  border-radius: 8px;
+  border-radius: var(--radius-panel);
   margin: 14px 0;
   color: var(--text);
-  font-size: 13px;
+  font-size: 14px;
 }
 .github-error p {
   margin: 8px 0;
@@ -2260,7 +2286,7 @@ details label {
 }
 .github-stats button {
   border: 1px solid var(--line);
-  border-radius: 9px;
+  border-radius: var(--radius-panel);
   background: var(--panel);
   padding: 20px;
   display: grid;
@@ -2275,13 +2301,15 @@ details label {
   color: var(--subtle);
 }
 .github-stats strong {
-  font-size: 26px;
-  font-weight: 600;
+  font-family: var(--display);
+  font-size: 38px;
+  font-weight: 500;
+  line-height: 1;
   grid-row: span 2;
 }
 .github-stats span {
   color: var(--subtle);
-  font-size: 12px;
+  font-size: 13px;
 }
 .github-account-grid {
   display: grid;
@@ -2291,7 +2319,7 @@ details label {
 .github-card {
   border: 1px solid var(--line);
   background: var(--panel);
-  border-radius: 9px;
+  border-radius: var(--radius-panel);
   padding: 20px;
   display: flex;
   gap: 12px;
@@ -2310,7 +2338,7 @@ details label {
   font-weight: 550;
 }
 .github-card p {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--subtle);
   margin: 0;
 }
@@ -2319,7 +2347,7 @@ details label {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px;
-  font-size: 12px;
+  font-size: 13px;
   margin: 12px 0;
 }
 .github-card dt {
@@ -2344,7 +2372,7 @@ details label {
   flex: 1;
   min-width: 220px;
   border: 1px solid var(--line-strong);
-  border-radius: 6px;
+  border-radius: var(--radius);
   padding: 0 12px;
   color: var(--subtle);
   background: var(--raised);
@@ -2358,7 +2386,7 @@ details label {
 .github-route-list,
 .github-machine-list {
   border: 1px solid var(--line);
-  border-radius: 8px;
+  border-radius: var(--radius-panel);
   overflow: hidden;
 }
 .github-route {
@@ -2383,13 +2411,13 @@ details label {
 .github-route-folder code,
 .github-route-folder span {
   display: block;
-  font-size: 11px;
+  font-size: 12px;
   color: var(--subtle);
   margin-top: 6px;
   overflow-wrap: anywhere;
 }
 .github-route > strong {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 500;
   overflow-wrap: anywhere;
 }
@@ -2399,7 +2427,7 @@ details label {
   gap: 12px;
   flex-wrap: wrap;
   color: var(--subtle);
-  font-size: 11px;
+  font-size: 12px;
   padding: 16px 0;
 }
 .github-config code {
@@ -2408,16 +2436,16 @@ details label {
 .github-empty {
   padding: 32px 20px;
   border: 1px dashed var(--line-strong);
-  border-radius: 8px;
+  border-radius: var(--radius-panel);
   text-align: center;
   color: var(--subtle);
-  font-size: 13px;
+  font-size: 14px;
   margin: 18px 0;
 }
 .github-scan label,
 .github-agent-panel label {
   display: block;
-  font-size: 12px;
+  font-size: 13px;
   margin: 16px 0 8px;
   color: var(--subtle);
 }
@@ -2432,13 +2460,13 @@ details label {
 .github-repository,
 .github-agent-panel {
   border: 1px solid var(--line);
-  border-radius: 9px;
+  border-radius: var(--radius-panel);
   background: var(--panel);
   padding: 20px;
   margin: 16px 0;
 }
 .github-repository code {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--subtle);
   overflow-wrap: anywhere;
 }
@@ -2453,7 +2481,7 @@ details label {
 .github-remotes strong,
 .github-remotes span {
   display: block;
-  font-size: 12px;
+  font-size: 13px;
   overflow-wrap: anywhere;
 }
 .github-remotes span {
@@ -2472,14 +2500,14 @@ details label {
   border: 1px solid var(--line);
   background: var(--raised);
   padding: 16px;
-  border-radius: 8px;
+  border-radius: var(--radius-panel);
   margin-top: 20px;
 }
 .github-command code {
   display: block;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
-  font-size: 12px;
+  font-size: 13px;
   line-height: 1.8;
   margin-bottom: 14px;
   user-select: all;
@@ -2491,7 +2519,7 @@ details label {
   margin-top: 20px;
 }
 .github-form label {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--subtle);
   display: flex;
   flex-direction: column;
@@ -2504,14 +2532,14 @@ details label {
   color: var(--text);
   min-height: 40px;
   padding: 8px 10px;
-  border-radius: 6px;
+  border-radius: var(--radius);
   font: inherit;
   width: 100%;
 }
 .github-form p {
   color: var(--subtle);
   line-height: 1.8;
-  font-size: 12px;
+  font-size: 13px;
   margin: 0;
 }
 .github-form code {
@@ -2528,7 +2556,7 @@ details label {
 }
 .text-button {
   color: var(--subtle);
-  font-size: 12px;
+  font-size: 13px;
   padding: 4px 0;
 }
 .text-button:hover {
@@ -2548,7 +2576,7 @@ details label {
     font-size: 22px;
   }
   .github-stats span {
-    font-size: 10px;
+    font-size: 11px;
   }
   .github-toolbar > *,
   .github-toolbar .github-actions {
@@ -2625,7 +2653,7 @@ details label {
 .credit-access {
   grid-column: 2 / -1;
   color: var(--subtle);
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1.7;
   margin-top: -8px;
   overflow-wrap: anywhere;

@@ -340,7 +340,7 @@ export function GitHubWorkspace({
           <div className="section-heading">
             <h2>GitHub workspace</h2>
             <button className="text-button" onClick={() => go('github-routes')}>
-              Manage routes →
+              Manage routes
             </button>
           </div>
           <div className="github-stats">
@@ -467,8 +467,9 @@ export function GitHubWorkspace({
                   <h2>{basename(route.path)}</h2>
                   <code>{route.path}</code>
                   <span>
-                    {route.repo || 'All repositories in this folder'} ·{' '}
-                    {route.host}
+                    {route.repo
+                      ? `${route.host}/${route.repo}`
+                      : `All ${route.host} repositories in this folder`}
                   </span>
                 </div>
                 <strong>@{route.account}</strong>
@@ -581,11 +582,12 @@ export function GitHubWorkspace({
                   <div key={`${remote.name}/${remote.host}/${remote.repo}`}>
                     <div>
                       <strong>
-                        {remote.name} · {remote.host}/{remote.repo}
+                        {remote.name}: {remote.host}/{remote.repo}
                       </strong>
                       <span>
-                        {remote.protocol.toUpperCase()} ·{' '}
-                        {remote.account ? `@${remote.account}` : 'Unassigned'}
+                        {remote.account
+                          ? `@${remote.account} over ${remote.protocol.toUpperCase()}`
+                          : `Unassigned, ${remote.protocol.toUpperCase()}`}
                       </span>
                     </div>
                     <button
@@ -686,7 +688,7 @@ export function GitHubWorkspace({
               {state.mappings.map((route) => (
                 <option key={key(route)} value={key(route)}>
                   {basename(route.path)}
-                  {route.repo ? ` · ${route.repo}` : ''} · @{route.account}
+                  {route.repo ? ` (${route.repo})` : ''}, @{route.account}
                 </option>
               ))}
             </select>
@@ -850,7 +852,7 @@ export function GitHubWorkspace({
               Remove the route for{' '}
               <code>
                 {removing.path}
-                {removing.repo ? ` · ${removing.repo}` : ''}
+                {removing.repo ? ` (${removing.repo})` : ''}
               </code>{' '}
               on {computer}? Projects may inherit another folder route after
               removal.
