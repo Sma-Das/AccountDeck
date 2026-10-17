@@ -2,6 +2,7 @@ import { createApp } from './app.js';
 import { homedir } from 'node:os';
 import { join } from 'node:path';
 import { createGitHubBridge } from './github.js';
+import { defaultGrokBotDir } from './grok-bot.js';
 import {
   readConfiguredConnection,
   defaultConnectionFile,
@@ -21,6 +22,7 @@ const app = createApp({
     'CLIProxy Console',
     'cursor-connection.json',
   ),
+  grokBotDir: defaultGrokBotDir(),
   defaultConnection,
   persistDefaultAutomation: defaultConnection
     ? (enabled) => saveConfiguredAutomation(connectionFile, enabled)
