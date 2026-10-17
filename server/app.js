@@ -5,6 +5,7 @@ import { readFile } from 'node:fs/promises';
 import { safeAccount, normalizeQuota, claudeCreditModels } from './quota.js';
 import { createExpiryRouter } from './expiry.js';
 import { createCursorTracker } from './cursor.js';
+import { createGrokBotReader } from './grok-bot.js';
 
 const providers = new Set([
   'claude',
@@ -41,6 +42,7 @@ export function createApp({
   expiryStateFile,
   nativeStatusFile,
   cursorStateFile,
+  grokBotDir = null,
   defaultConnection = null,
   persistDefaultAutomation,
   githubRequest = null,
@@ -59,6 +61,7 @@ export function createApp({
     fetchImpl,
     now,
   });
+  const grokBot = createGrokBotReader({ dataDir: grokBotDir, now });
   const sessions = new Map();
   const workspaceSessions = new Map();
   const quotaReads = new Map();
@@ -329,6 +332,14 @@ export function createApp({
     res.json({ connected: false });
   });
 
+  // Grok Bot usage is read from this Mac, so it follows the workspace session.
+  app.get('/api/grok-bot', async (req, res) => {
+    if (!req.workspaceAuthenticated)
+      return res
+        .status(401)
+        .json({ error: 'Reload AccountDeck to open a workspace session.' });
+    res.json(await grokBot());
+  });
   app.get('/api/cursor', required, async (req, res) =>
     res.json(await cursor.status()),
   );

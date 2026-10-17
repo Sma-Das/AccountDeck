@@ -1066,3 +1066,14 @@ test('concurrent quota refreshes share one request instead of causing a provider
     1,
   );
 });
+
+test('Grok Bot usage needs only a workspace session and works without a proxy', async (t) => {
+  const { request } = await fixture(t, null, {
+    grokBotDir: '/nonexistent/grok-bot',
+  });
+  assert.equal((await request('/grok-bot')).status, 401);
+  await request('/workspace/session');
+  const result = await request('/grok-bot');
+  assert.equal(result.status, 200);
+  assert.equal(result.data.connected, false);
+});

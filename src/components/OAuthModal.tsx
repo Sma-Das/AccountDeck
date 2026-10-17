@@ -6,7 +6,13 @@ import {
   Loader2,
   Network,
 } from 'lucide-react';
-import { api, info, providerInfo, errorMessage as message } from '../types';
+import {
+  api,
+  info,
+  localSubscriptions,
+  providerInfo,
+  errorMessage as message,
+} from '../types';
 import { Brand, Modal } from './ui';
 
 export function OAuthModal({
@@ -103,7 +109,7 @@ export function OAuthModal({
           onChange={(event) => setProvider(event.target.value)}
         >
           {Object.keys(providerInfo)
-            .filter((id) => id !== 'cursor')
+            .filter((id) => !localSubscriptions.includes(id))
             .map((id) => (
               <option key={id} value={id}>
                 {info(id).name}

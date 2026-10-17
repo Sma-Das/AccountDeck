@@ -34,6 +34,7 @@ import {
   api,
   createDemo,
   info,
+  localSubscriptions,
   masked,
   providerInfo,
   relative,
@@ -48,6 +49,7 @@ import { RoutingPage } from './components/RoutingPage';
 import { SetupPage } from './components/SetupPage';
 import { GitHubWorkspace } from './components/GitHubWorkspace';
 import { CursorUsage } from './components/CursorUsage';
+import { GrokBotUsage } from './components/GrokBotUsage';
 import { CreditAccessNote } from './components/CreditAccessNote';
 import { LimitDisplayModal } from './components/LimitDisplayModal';
 import {
@@ -673,6 +675,7 @@ export default function App() {
             </button>
           );
         })}
+      <GrokBotUsage summary display={limitDisplay} />
       <CursorUsage
         summary
         active={connected}
@@ -969,7 +972,7 @@ export default function App() {
               </div>
               <p id="expiry-help" className="expiry-help">
                 {connected
-                  ? 'Prefer unused Claude, Codex, and Grok quota in the last 15 minutes.'
+                  ? 'Prefer unused Claude, Codex, and Grok Build quota in the last 15 minutes.'
                   : 'Connect your proxy to auto-prioritize expiring quota.'}
                 {expiry.boosted.length > 0 &&
                   ` ${expiry.boosted.length} prioritized.`}
@@ -1217,13 +1220,14 @@ export default function App() {
                 </h2>
               </div>
               <div className="provider-grid">
+                <GrokBotUsage display={limitDisplay} />
                 <CursorUsage
                   active={connected}
                   display={limitDisplay}
                   saveDisplay={saveLimitDisplay}
                 />
                 {providers
-                  .filter((provider) => provider !== 'cursor')
+                  .filter((provider) => !localSubscriptions.includes(provider))
                   .map((provider) => {
                     const group = accounts.filter(
                       (a) => a.provider === provider,
