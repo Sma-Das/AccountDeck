@@ -1,17 +1,22 @@
 import { useEffect, useRef, useState } from 'react';
 import {
+  ArrowRight,
+  CircleAlert,
   Copy,
   FolderGit2,
+  GitBranch,
   Github,
   Laptop,
+  Pencil,
   Plus,
   RefreshCw,
   Search,
   Trash2,
+  X,
 } from 'lucide-react';
 import { api, errorMessage } from '../types';
 import type { Page } from '../types';
-import { Modal } from './ui';
+import { Modal, PageHeader, Skeleton } from './ui';
 
 type GitHubAccount = {
   host: string;
@@ -62,14 +67,63 @@ const shellQuote = (value: string) =>
 const login = (host: string) =>
   `env -u GH_TOKEN -u GITHUB_TOKEN -u GH_ENTERPRISE_TOKEN -u GITHUB_ENTERPRISE_TOKEN -u GH_DEBUG -u DEBUG gh auth login${host === 'github.com' ? '' : ` --hostname ${shellQuote(host)}`} --web`;
 
+export type GitHubSummary = {
+  loading: boolean;
+  error: boolean;
+  accounts: number | null;
+  routes: number | null;
+  folders: number | null;
+  computers: number;
+  computer: string;
+};
+
+function Avatar({ host, account }: { host: string; account: string }) {
+  const [failed, setFailed] = useState(false);
+  if (host !== 'github.com' || failed)
+    return (
+      <span className="avatar" aria-hidden="true">
+        {account[0]?.toUpperCase()}
+      </span>
+    );
+  return (
+    <img
+      className="avatar"
+      src={`https://github.com/${encodeURIComponent(account)}.png?size=80`}
+      alt=""
+      onError={() => setFailed(true)}
+    />
+  );
+}
+
+function AccountTag({
+  host,
+  account,
+  hue,
+}: {
+  host: string;
+  account: string;
+  hue: string;
+}) {
+  return (
+    <span className={`account-tag ${hue}`} title={`${host}/${account}`}>
+      <i className="swatch" />@{account}
+      {host !== 'github.com' && <small>{host}</small>}
+    </span>
+  );
+}
+
 export function GitHubWorkspace({
   page,
+  header,
   go,
   notify,
+  onSummary,
 }: {
   page: Page;
+  header: { title: string; description: string };
   go: (page: Page) => void;
   notify: (text: string, error?: boolean) => void;
+  onSummary: (summary: GitHubSummary) => void;
 }) {
   const [machine, setMachine] = useState(
     () => sessionStorage.getItem('accountdeck-github-machine') || 'local',
@@ -86,6 +140,7 @@ export function GitHubWorkspace({
   const [scanPath, setScanPath] = useState('');
   const [repositories, setRepositories] = useState<Repository[] | null>(null);
   const [scanning, setScanning] = useState(false);
+  const [unassignedOnly, setUnassignedOnly] = useState(false);
   const [routeForm, setRouteForm] = useState<Route | null>(null);
   const [editing, setEditing] = useState(false);
   const [removing, setRemoving] = useState<Route | null>(null);
@@ -246,276 +301,447 @@ export function GitHubWorkspace({
   const command = selectedRoute
     ? `ghr exec --path ${shellQuote(selectedRoute.path)} --host ${shellQuote(selectedRoute.host)}${selectedRoute.repo ? ` --repo ${shellQuote(selectedRoute.repo)}` : ''} -- ${agent}`
     : '';
+  // Each account keeps one colour everywhere so routes are easy to scan.
+  const accountKeys = Array.from(
+    new Set([
+      ...state.accounts.map((account) => `${account.host}/${account.account}`),
+      ...state.mappings.map((route) => `${route.host}/${route.account}`),
+    ]),
+  );
+  const hue = (host: string, account: string) =>
+    `hue-${Math.max(0, accountKeys.indexOf(`${host}/${account}`)) % 6}`;
+  useEffect(() => {
+    onSummary({
+      loading,
+      error: !!error,
+      accounts: ready ? state.accounts.length : null,
+      routes: ready ? state.mappings.length : null,
+      folders: ready
+        ? new Set(state.mappings.map((route) => route.path)).size
+        : null,
+      computers: machines.length + 1,
+      computer,
+    });
+  }, [loading, error, ready, state, machines, computer, onSummary]);
 
-  if (!active) return null;
+  if (!active || page === 'overview') return null;
+  const picker = (
+    <label
+      className="select-control computer-select"
+      title="Computer whose GitHub accounts and routes you are managing"
+    >
+      <Laptop size={14} />
+      <select
+        aria-label="GitHub computer"
+        value={machine}
+        disabled={busy || scanning || loading}
+        onChange={(event) => selectMachine(event.target.value)}
+      >
+        <option value="local">
+          {(machine === 'local' && state.machine.hostname) || 'This computer'}
+        </option>
+        {!machines.some((item) => item.name === machine) &&
+          machine !== 'local' && <option value={machine}>{machine}</option>}
+        {machines.map((item) => (
+          <option key={item.name} value={item.name}>
+            {item.name}
+          </option>
+        ))}
+      </select>
+    </label>
+  );
+  const primary =
+    page === 'github-routes' ? (
+      <button
+        className="primary"
+        disabled={!ready || busy}
+        onClick={() => newRoute()}
+      >
+        <Plus size={15} />
+        Add route
+      </button>
+    ) : page === 'github-accounts' ? (
+      <button
+        className="primary"
+        disabled={!ready}
+        onClick={() => setLoginOpen(true)}
+      >
+        <Plus size={15} />
+        Add account
+      </button>
+    ) : page === 'github-machines' ? (
+      <button
+        className="primary"
+        disabled={busy}
+        onClick={() => {
+          setPairName('');
+          setPairUrl('');
+          setFormError('');
+          setPairing(true);
+        }}
+      >
+        <Plus size={15} />
+        Pair computer
+      </button>
+    ) : null;
+  const commandBlock = (text: string, placeholder = '') => (
+    <div className={`command ${text ? '' : 'empty'}`}>
+      <code>{text || placeholder}</code>
+      <button
+        className="icon-button"
+        disabled={!text}
+        onClick={() => void copy(text)}
+        aria-label="Copy command"
+        title="Copy command"
+      >
+        <Copy size={14} />
+      </button>
+    </div>
+  );
+  const routeCounts = state.mappings.reduce(
+    (counts, route) =>
+      counts.set(
+        `${route.host}/${route.account}`,
+        (counts.get(`${route.host}/${route.account}`) || 0) + 1,
+      ),
+    new Map<string, number>(),
+  );
+  const groups = Array.from(
+    routes
+      .reduce(
+        (map, route) =>
+          map.set(route.path, [...(map.get(route.path) || []), route]),
+        new Map<string, Route[]>(),
+      )
+      .entries(),
+  )
+    .map(
+      ([path, list]) =>
+        [
+          path,
+          list.sort(
+            (a, b) =>
+              Number(!!a.repo) - Number(!!b.repo) ||
+              (a.repo || '').localeCompare(b.repo || ''),
+          ),
+        ] as const,
+    )
+    .sort(([a], [b]) =>
+      basename(a).localeCompare(basename(b), undefined, {
+        sensitivity: 'base',
+      }),
+    );
+  const tilde = (path: string) =>
+    state.home && (path === state.home || path.startsWith(`${state.home}/`))
+      ? `~${path.slice(state.home.length)}`
+      : path;
+  const unassigned = (repo: Repository) =>
+    repo.remotes.filter((remote) => !remote.account).length;
+  const shownRepositories = repositories?.filter(
+    (repo) => !unassignedOnly || unassigned(repo) > 0,
+  );
+
   return (
     <section className="github-workspace" aria-label="GitHub workspace">
-      <div className="github-toolbar">
-        <label className="computer-picker">
-          <Laptop size={16} />
-          <span>GitHub computer</span>
-          <select
-            aria-label="GitHub computer"
-            value={machine}
-            disabled={busy || scanning || loading}
-            onChange={(event) => selectMachine(event.target.value)}
-          >
-            <option value="local">
-              {(machine === 'local' && state.machine.hostname) ||
-                'This computer'}
-            </option>
-            {!machines.some((item) => item.name === machine) &&
-              machine !== 'local' && <option value={machine}>{machine}</option>}
-            {machines.map((item) => (
-              <option key={item.name} value={item.name}>
-                {item.name}
-              </option>
-            ))}
-          </select>
-        </label>
-        <div className="github-actions">
+      <PageHeader
+        title={header.title}
+        description={header.description}
+        actions={
+          <>
+            {picker}
+            <button
+              className="icon-button bordered"
+              disabled={busy || scanning || loading}
+              onClick={() => void load()}
+              aria-label="Refresh GitHub"
+              title="Reload accounts and routes"
+            >
+              <RefreshCw size={15} className={loading ? 'spin' : ''} />
+            </button>
+            {primary}
+          </>
+        }
+      />
+      {error && (
+        <div className="callout red" role="alert">
+          <CircleAlert size={16} />
+          <div>
+            <strong>GitHub workspace unavailable on {computer}</strong>
+            <p>{error}</p>
+          </div>
           <button
             className="secondary compact"
-            disabled={busy || scanning || loading}
+            disabled={loading}
             onClick={() => void load()}
           >
-            <RefreshCw size={14} className={loading ? 'spin' : ''} />
-            Refresh GitHub
+            Retry
           </button>
-          {page === 'github-routes' && (
-            <button
-              className="primary compact"
-              disabled={!ready || busy}
-              onClick={() => newRoute()}
-            >
-              <Plus size={14} />
-              Add route
-            </button>
-          )}
-          {page === 'github-accounts' && (
-            <button
-              className="primary compact"
-              disabled={!ready}
-              onClick={() => setLoginOpen(true)}
-            >
-              <Plus size={14} />
-              Add GitHub account
-            </button>
-          )}
-          {page === 'github-machines' && (
-            <button
-              className="primary compact"
-              disabled={busy}
-              onClick={() => {
-                setPairName('');
-                setPairUrl('');
-                setFormError('');
-                setPairing(true);
-              }}
-            >
-              <Plus size={14} />
-              Pair computer
-            </button>
-          )}
-        </div>
-      </div>
-      <p className="github-scope">
-        GitHub accounts and routes below belong to {computer}. AI providers use
-        this Mac's proxy.
-      </p>
-      {error && (
-        <div className="github-error" role="alert">
-          <strong>GitHub workspace unavailable</strong>
-          <p>{error}</p>
-          <p>Select another computer or refresh to retry.</p>
         </div>
       )}
-      {loading && (
-        <p className="github-empty" role="status">
-          Loading GitHub accounts and routes…
-        </p>
-      )}
-      {page === 'overview' && ready && (
-        <>
-          <div className="section-heading">
-            <h2>GitHub workspace</h2>
-            <button className="text-button" onClick={() => go('github-routes')}>
-              Manage routes →
-            </button>
-          </div>
-          <div className="github-stats">
-            <button onClick={() => go('github-accounts')}>
-              <Github size={18} />
-              <strong>{state.accounts.length}</strong>
-              <span>GitHub accounts</span>
-            </button>
-            <button onClick={() => go('github-routes')}>
-              <FolderGit2 size={18} />
-              <strong>{state.mappings.length}</strong>
-              <span>Folder routes</span>
-            </button>
-            <button onClick={() => go('github-machines')}>
-              <Laptop size={18} />
-              <strong>{machines.length + 1}</strong>
-              <span>Computers</span>
-            </button>
-          </div>
-        </>
+      {loading && page !== 'github-machines' && (
+        <div
+          className="card"
+          role="status"
+          aria-label="Loading GitHub workspace"
+        >
+          <Skeleton rows={4} />
+        </div>
       )}
       {page === 'github-accounts' && ready && (
         <>
-          <p className="github-help">
-            Accounts come from GitHub CLI on {computer}. Add or renew
-            credentials on that computer, then refresh here.
-          </p>
           <div className="github-account-grid">
-            {state.accounts.map((account) => (
-              <article
-                className="github-card"
-                key={`${account.host}/${account.account}`}
-              >
-                <Github size={22} />
-                <div>
-                  <h2>@{account.account}</h2>
-                  <p>{account.host}</p>
-                </div>
-                <span
-                  className={`badge ${account.state === 'success' ? 'green' : 'red'}`}
-                >
-                  {account.state === 'success' ? 'Signed in' : account.state}
-                </span>
-                <dl>
-                  <dt>Credential storage</dt>
-                  <dd>{account.source}</dd>
-                  <dt>CLI default</dt>
-                  <dd>
-                    {account.active
-                      ? 'Active'
-                      : 'Folder routes select this account'}
-                  </dd>
-                  <dt>Routes</dt>
-                  <dd>
-                    {
-                      state.mappings.filter(
-                        (route) =>
-                          route.account === account.account &&
-                          route.host === account.host,
-                      ).length
-                    }
-                  </dd>
-                </dl>
-                <button
-                  className="secondary"
-                  onClick={() => {
-                    setLoginHost(account.host);
-                    setLoginOpen(true);
-                  }}
-                >
-                  Sign in on {computer}
-                </button>
-              </article>
-            ))}
+            {state.accounts.map((account) => {
+              const id = `${account.host}/${account.account}`;
+              const count = routeCounts.get(id) || 0;
+              return (
+                <article className="card github-card" key={id}>
+                  <div className="github-card-head">
+                    <Avatar host={account.host} account={account.account} />
+                    <div>
+                      <h2 title={`@${account.account}`}>@{account.account}</h2>
+                      <p>
+                        {account.host}
+                        {account.active && (
+                          <span className="tag">CLI default</span>
+                        )}
+                      </p>
+                    </div>
+                    <span
+                      className={`badge ${account.state === 'success' ? 'green' : 'red'}`}
+                    >
+                      {account.state === 'success'
+                        ? 'Signed in'
+                        : account.state}
+                    </span>
+                  </div>
+                  <dl>
+                    <div>
+                      <dt>Folder routes</dt>
+                      <dd>
+                        {count ? (
+                          <button
+                            className="link-button"
+                            onClick={() => {
+                              setFilter(id);
+                              setQuery('');
+                              go('github-routes');
+                            }}
+                          >
+                            {count}
+                            <ArrowRight size={13} />
+                          </button>
+                        ) : (
+                          'None'
+                        )}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt>Credentials</dt>
+                      <dd>{account.source}</dd>
+                    </div>
+                  </dl>
+                  <button
+                    className="secondary compact"
+                    onClick={() => {
+                      setLoginHost(account.host);
+                      setLoginOpen(true);
+                    }}
+                  >
+                    Renew sign-in
+                  </button>
+                </article>
+              );
+            })}
           </div>
           {!state.accounts.length && (
-            <p className="github-empty">
-              No GitHub accounts are stored on this computer yet.
-            </p>
+            <div className="empty-state card">
+              <Github size={22} />
+              <h3>No GitHub accounts on {computer}</h3>
+              <p>Sign in with GitHub CLI on that computer, then refresh.</p>
+              <button className="secondary" onClick={() => setLoginOpen(true)}>
+                <Plus size={14} />
+                Add account
+              </button>
+            </div>
           )}
+          <p className="footnote">
+            Accounts come from GitHub CLI on {computer}. Add or renew
+            credentials there, then refresh.
+          </p>
         </>
       )}
       {page === 'github-routes' && ready && (
         <>
-          <div className="github-filters">
-            <label className="github-search">
+          <div className="toolbar standalone">
+            <label className="search-field">
               <Search size={15} />
               <input
+                data-search
                 aria-label="Search GitHub routes"
-                placeholder="Search folders, accounts, repositories…"
+                placeholder="Search folders, repositories, accounts"
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
               />
+              {query ? (
+                <button
+                  className="icon-button"
+                  onClick={() => setQuery('')}
+                  aria-label="Clear search"
+                >
+                  <X size={13} />
+                </button>
+              ) : (
+                <kbd>/</kbd>
+              )}
             </label>
-            <select
+            <div
+              className="chip-group"
+              role="group"
               aria-label="Filter routes by account"
-              value={filter}
-              onChange={(event) => setFilter(event.target.value)}
             >
-              <option value="all">All accounts</option>
-              {Array.from(
-                new Set(
-                  state.mappings.map(
-                    (route) => `${route.host}/${route.account}`,
-                  ),
-                ),
-              ).map((value) => (
-                <option key={value} value={value}>
-                  {value}
-                </option>
+              <button
+                className="chip"
+                aria-pressed={filter === 'all'}
+                onClick={() => setFilter('all')}
+              >
+                All<span>{state.mappings.length}</span>
+              </button>
+              {Array.from(routeCounts.entries()).map(([id, count]) => {
+                const [host, ...rest] = id.split('/');
+                const account = rest.join('/');
+                return (
+                  <button
+                    key={id}
+                    className={`chip ${hue(host, account)}`}
+                    aria-pressed={filter === id}
+                    onClick={() => setFilter(filter === id ? 'all' : id)}
+                    title={id}
+                  >
+                    <i className="swatch" />@{account}
+                    <span>{count}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+          {groups.length > 0 && (
+            <div className="card flush route-groups">
+              {groups.map(([path, list]) => (
+                <article className="route-group" key={path}>
+                  <div className="route-folder">
+                    <FolderGit2 size={16} />
+                    <div>
+                      <h3>{basename(path)}</h3>
+                      <code title={path}>{tilde(path)}</code>
+                    </div>
+                    <button
+                      className="icon-button route-add"
+                      disabled={busy}
+                      title="Add a repository route in this folder"
+                      aria-label={`Add a repository route in ${path}`}
+                      onClick={() => newRoute({ path })}
+                    >
+                      <Plus size={14} />
+                    </button>
+                  </div>
+                  <ul>
+                    {list.map((route) => (
+                      <li key={key(route)}>
+                        <span
+                          className={`route-scope ${route.repo ? '' : 'all'}`}
+                        >
+                          {route.repo ? (
+                            <>
+                              <GitBranch size={13} />
+                              <span>{route.repo}</span>
+                            </>
+                          ) : (
+                            'All repositories'
+                          )}
+                        </span>
+                        <AccountTag
+                          host={route.host}
+                          account={route.account}
+                          hue={hue(route.host, route.account)}
+                        />
+                        <span className="route-actions">
+                          <button
+                            className="icon-button"
+                            disabled={busy}
+                            title="Edit route"
+                            aria-label={`Edit route ${route.path}${route.repo ? ` for ${route.repo}` : ''}`}
+                            onClick={() => {
+                              setFormError('');
+                              setEditing(true);
+                              setRouteForm(route);
+                            }}
+                          >
+                            <Pencil size={14} />
+                          </button>
+                          <button
+                            className="icon-button danger-hover"
+                            disabled={busy}
+                            title="Remove route"
+                            aria-label={`Remove route ${route.path}${route.repo ? ` for ${route.repo}` : ''}`}
+                            onClick={() => {
+                              setFormError('');
+                              setRemoving(route);
+                            }}
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </article>
               ))}
-            </select>
-          </div>
-          <p className="github-help">
-            Folder routes apply to nested repositories and worktrees. A checkout
-            with repository-specific routes requires an assignment for each
-            remote.
-          </p>
-          <div className="github-route-list">
-            {routes.map((route) => (
-              <article className="github-route" key={key(route)}>
-                <FolderGit2 size={20} />
-                <div className="github-route-folder">
-                  <h2>{basename(route.path)}</h2>
-                  <code>{route.path}</code>
-                  <span>
-                    {route.repo || 'All repositories in this folder'} ·{' '}
-                    {route.host}
-                  </span>
-                </div>
-                <strong>@{route.account}</strong>
-                <div className="github-actions">
-                  <button
-                    className="secondary compact"
-                    disabled={busy}
-                    aria-label={`Edit route ${route.path}${route.repo ? ` for ${route.repo}` : ''}`}
-                    onClick={() => {
-                      setFormError('');
-                      setEditing(true);
-                      setRouteForm(route);
-                    }}
-                  >
-                    Edit
-                  </button>
-                  <button
-                    className="icon-button"
-                    disabled={busy}
-                    aria-label={`Remove route ${route.path}${route.repo ? ` for ${route.repo}` : ''}`}
-                    onClick={() => {
-                      setFormError('');
-                      setRemoving(route);
-                    }}
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                </div>
-              </article>
-            ))}
-          </div>
-          {!routes.length && (
-            <div className="github-empty">
-              {state.mappings.length
-                ? 'No routes match your search.'
-                : 'Add a folder route to choose which GitHub account your projects use.'}
             </div>
           )}
-          <div className="github-config">
-            <span>Routing configuration on {computer}</span>
+          {!routes.length && (
+            <div className="empty-state card">
+              <FolderGit2 size={22} />
+              <h3>
+                {state.mappings.length
+                  ? 'No matching routes'
+                  : 'No folder routes yet'}
+              </h3>
+              <p>
+                {state.mappings.length
+                  ? 'Try another search or account.'
+                  : 'Add a folder route to choose which GitHub account your projects use.'}
+              </p>
+              {state.mappings.length ? (
+                <button
+                  className="secondary"
+                  onClick={() => {
+                    setQuery('');
+                    setFilter('all');
+                  }}
+                >
+                  Clear filters
+                </button>
+              ) : (
+                <button className="secondary" onClick={() => newRoute()}>
+                  <Plus size={14} />
+                  Add route
+                </button>
+              )}
+            </div>
+          )}
+          <div className="footnote config-path">
+            <span>
+              A checkout with repository routes needs an assignment for each
+              remote. Configuration on {computer}:
+            </span>
             <code>{state.config}</code>
             <button
               className="icon-button"
               aria-label="Copy GitHub configuration path"
+              title="Copy path"
               onClick={() => void copy(state.config)}
             >
-              <Copy size={14} />
+              <Copy size={13} />
             </button>
           </div>
         </>
@@ -523,7 +749,7 @@ export function GitHubWorkspace({
       {page === 'github-repositories' && ready && (
         <>
           <form
-            className="github-scan"
+            className="card scan-card"
             onSubmit={(event) => {
               event.preventDefault();
               void scan();
@@ -543,205 +769,286 @@ export function GitHubWorkspace({
               />
               <button className="primary" disabled={scanning || busy}>
                 <Search size={15} />
-                {scanning ? 'Scanning…' : 'Scan repositories'}
+                {scanning ? 'Scanning…' : 'Scan'}
               </button>
             </div>
-          </form>
-          <p className="github-help">
-            Scans up to 200 repositories within five folder levels. Linked
-            worktrees inherit their primary checkout's routes.
-          </p>
-          {repositories?.map((repo) => (
-            <article className="github-repository" key={repo.path}>
-              <div className="section-heading">
-                <div>
-                  <h2>{basename(repo.path)}</h2>
-                  <code>{repo.path}</code>
-                </div>
-                <button
-                  className="secondary compact"
-                  disabled={busy}
-                  onClick={() => newRoute({ path: repo.path })}
-                >
-                  Set folder default
-                </button>
-              </div>
-              {repo.primary !== repo.path && (
-                <p className="github-help">Primary checkout: {repo.primary}</p>
-              )}
-              <div className="github-remotes">
-                {Array.from(
-                  new Map(
-                    repo.remotes.map((remote) => [
-                      `${remote.name}/${remote.host}/${remote.repo}`,
-                      remote,
-                    ]),
-                  ).values(),
-                ).map((remote) => (
-                  <div key={`${remote.name}/${remote.host}/${remote.repo}`}>
-                    <div>
-                      <strong>
-                        {remote.name} · {remote.host}/{remote.repo}
-                      </strong>
-                      <span>
-                        {remote.protocol.toUpperCase()} ·{' '}
-                        {remote.account ? `@${remote.account}` : 'Unassigned'}
-                      </span>
-                    </div>
-                    <button
-                      className="secondary compact"
-                      disabled={busy}
-                      onClick={() =>
-                        newRoute({
-                          path: repo.path,
-                          host: remote.host,
-                          repo: remote.repo,
-                          account: remote.account || '',
-                        })
-                      }
-                    >
-                      Assign account
-                    </button>
-                  </div>
-                ))}
-              </div>
-              {!repo.remotes.length && (
-                <p className="github-help">No GitHub remotes found.</p>
-              )}
-            </article>
-          ))}
-          {repositories?.length === 0 && (
-            <p className="github-empty">
-              No repositories found in this folder.
+            <p>
+              Finds up to 200 repositories within five folder levels. Linked
+              worktrees inherit their primary checkout’s routes.
             </p>
+          </form>
+          {scanning && (
+            <div className="card" role="status" aria-label="Scanning">
+              <Skeleton rows={3} />
+            </div>
+          )}
+          {repositories && repositories.length > 0 && (
+            <div className="scan-summary">
+              <span>
+                <strong>{repositories.length}</strong> repositories ·{' '}
+                <strong
+                  className={
+                    repositories.some((repo) => unassigned(repo) > 0)
+                      ? 'yellow'
+                      : 'green'
+                  }
+                >
+                  {repositories.reduce(
+                    (sum, repo) => sum + unassigned(repo),
+                    0,
+                  )}
+                </strong>{' '}
+                remotes without an account
+              </span>
+              <label className="check-control">
+                <input
+                  type="checkbox"
+                  checked={unassignedOnly}
+                  onChange={(event) => setUnassignedOnly(event.target.checked)}
+                />
+                Only show unassigned
+              </label>
+            </div>
+          )}
+          <div className="repo-list">
+            {shownRepositories?.map((repo) => (
+              <article className="card repo" key={repo.path}>
+                <div className="repo-head">
+                  <FolderGit2 size={16} />
+                  <div>
+                    <h3>{basename(repo.path)}</h3>
+                    <code>{tilde(repo.path)}</code>
+                    {repo.primary !== repo.path && (
+                      <small>Worktree of {repo.primary}</small>
+                    )}
+                  </div>
+                  <button
+                    className="secondary compact"
+                    disabled={busy}
+                    onClick={() => newRoute({ path: repo.path })}
+                  >
+                    Set folder default
+                  </button>
+                </div>
+                {repo.remotes.length > 0 ? (
+                  <ul className="remote-list">
+                    {Array.from(
+                      new Map(
+                        repo.remotes.map((remote) => [
+                          `${remote.name}/${remote.host}/${remote.repo}`,
+                          remote,
+                        ]),
+                      ).values(),
+                    ).map((remote) => (
+                      <li key={`${remote.name}/${remote.host}/${remote.repo}`}>
+                        <span className="remote-name">{remote.name}</span>
+                        <code>
+                          {remote.host}/{remote.repo}
+                        </code>
+                        <span className="tag">
+                          {remote.protocol.toUpperCase()}
+                        </span>
+                        {remote.account ? (
+                          <AccountTag
+                            host={remote.host}
+                            account={remote.account}
+                            hue={hue(remote.host, remote.account)}
+                          />
+                        ) : (
+                          <span className="tag yellow">No account</span>
+                        )}
+                        <button
+                          className="secondary compact"
+                          disabled={busy}
+                          onClick={() =>
+                            newRoute({
+                              path: repo.path,
+                              host: remote.host,
+                              repo: remote.repo,
+                              account: remote.account || '',
+                            })
+                          }
+                        >
+                          {remote.account ? 'Change' : 'Assign'}
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="footnote">No GitHub remotes found.</p>
+                )}
+              </article>
+            ))}
+          </div>
+          {repositories?.length === 0 && (
+            <div className="empty-state card">
+              <Search size={22} />
+              <h3>No repositories found</h3>
+              <p>Try a parent folder or check the path.</p>
+            </div>
           )}
         </>
       )}
       {page === 'github-machines' && (
         <>
-          <p className="github-help">
-            Pair another computer using its GitHub router session URL. Accounts
-            and credentials stay on their own computer. Paired computers need
-            their existing GitHub router service running.
-          </p>
-          <div className="github-machine-list">
-            <article className="github-route">
-              <Laptop size={20} />
-              <div className="github-route-folder">
-                <h2>This computer</h2>
-                <span>
-                  {(machine === 'local' && state.machine.hostname) ||
-                    'AccountDeck host'}
+          <div className="card flush machine-list">
+            {[
+              {
+                id: 'local',
+                name: 'This computer',
+                detail:
+                  (machine === 'local' && state.machine.hostname) ||
+                  'AccountDeck host',
+              },
+              ...machines.map((item) => ({
+                id: item.name,
+                name: item.name,
+                detail: item.url,
+              })),
+            ].map((item) => (
+              <article className="machine-row" key={item.id}>
+                <span className="machine-icon">
+                  <Laptop size={16} />
                 </span>
-              </div>
-              <span className="badge">Local</span>
-            </article>
-            {machines.map((item) => (
-              <article className="github-route" key={item.name}>
-                <Laptop size={20} />
-                <div className="github-route-folder">
-                  <h2>{item.name}</h2>
-                  <code>{item.url}</code>
+                <div>
+                  <h3>
+                    {item.name}
+                    {item.id === 'local' && <span className="tag">Local</span>}
+                    {machine === item.id && (
+                      <span className="tag accent">Managing</span>
+                    )}
+                  </h3>
+                  <code>{item.detail}</code>
                 </div>
-                <button
-                  className="secondary compact"
-                  disabled={
-                    busy || scanning || loading || machine === item.name
-                  }
-                  onClick={() => selectMachine(item.name)}
-                >
-                  {machine === item.name ? 'Selected' : 'Select'}
-                </button>
-                <button
-                  className="icon-button"
-                  disabled={busy || scanning || loading}
-                  aria-label={`Unpair ${item.name}`}
-                  onClick={() => {
-                    setFormError('');
-                    setUnpairing(item);
-                  }}
-                >
-                  <Trash2 size={16} />
-                </button>
+                {machine !== item.id && (
+                  <button
+                    className="secondary compact"
+                    disabled={busy || scanning || loading}
+                    onClick={() => selectMachine(item.id)}
+                  >
+                    Manage
+                  </button>
+                )}
+                {item.id !== 'local' && (
+                  <button
+                    className="icon-button danger-hover"
+                    disabled={busy || scanning || loading}
+                    aria-label={`Unpair ${item.name}`}
+                    title="Unpair"
+                    onClick={() => {
+                      setFormError('');
+                      setUnpairing({ name: item.id, url: item.detail });
+                    }}
+                  >
+                    <Trash2 size={15} />
+                  </button>
+                )}
               </article>
             ))}
           </div>
+          <p className="footnote">
+            Pair with the complete session URL printed by <code>ghr ui</code>.
+            Accounts and credentials stay on their own computer, and each paired
+            computer needs its GitHub router service running.
+          </p>
         </>
       )}
       {page === 'github-agents' && ready && (
-        <div className="github-agent-panel">
-          <h2>Run an agent with the right GitHub identity</h2>
-          <p className="github-help">
-            Run this command on {computer}. The router chooses credentials for
-            the folder without switching the CLI default. The ghr CLI must be
-            installed on that computer.
-          </p>
-          <label>
-            Folder route
-            <select
-              value={agentRoute}
-              onChange={(event) => setAgentRoute(event.target.value)}
-            >
-              <option value="">Choose a route</option>
-              {state.mappings.map((route) => (
-                <option key={key(route)} value={key(route)}>
-                  {basename(route.path)}
-                  {route.repo ? ` · ${route.repo}` : ''} · @{route.account}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label>
-            Agent
-            <select
-              value={agent}
-              onChange={(event) => setAgent(event.target.value)}
-            >
-              <option value="codex">Codex</option>
-              <option value="claude">Claude Code</option>
-              <option value="grok">Grok</option>
-              <option value="opencode">OpenCode</option>
-              <option value="gh auth status">GitHub CLI identity check</option>
-            </select>
-          </label>
-          {command && (
-            <div className="github-command">
-              <code>{command}</code>
+        <>
+          {!state.mappings.length && (
+            <div className="callout">
+              <FolderGit2 size={16} />
+              <div>
+                <strong>No folder routes on {computer}</strong>
+                <p>
+                  Agent commands run with the account a folder is routed to.
+                </p>
+              </div>
               <button
                 className="secondary compact"
-                onClick={() => void copy(command)}
+                onClick={() => go('github-routes')}
               >
-                <Copy size={14} />
-                Copy command
+                Add a route
+                <ArrowRight size={14} />
               </button>
             </div>
           )}
-          <h2 className="github-git-title">Route ordinary Git commands</h2>
-          <p className="github-help">
-            Run this inside a checkout on {computer} to configure its Git
-            credential helper. HTTPS remotes then use the folder route.
-          </p>
-          <div className="github-command">
-            <code>ghr setup</code>
-            <button
-              className="secondary compact"
-              onClick={() => void copy('ghr setup')}
-            >
-              <Copy size={14} />
-              Copy setup command
-            </button>
+          <div className="agent-layout">
+            <section className="card">
+              <div className="card-header">
+                <div>
+                  <h2>Run an agent</h2>
+                  <p>
+                    The router picks credentials for the folder without
+                    switching the CLI default. Requires <code>ghr</code> on{' '}
+                    {computer}.
+                  </p>
+                </div>
+              </div>
+              <label className="field">
+                Folder route
+                <select
+                  value={agentRoute}
+                  onChange={(event) => setAgentRoute(event.target.value)}
+                >
+                  <option value="">Choose a route</option>
+                  {state.mappings.map((route) => (
+                    <option key={key(route)} value={key(route)}>
+                      {basename(route.path)}
+                      {route.repo ? ` · ${route.repo}` : ''} · @{route.account}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <div className="field">
+                <span id="agent-label">Agent</span>
+                <div
+                  className="chip-group"
+                  role="group"
+                  aria-labelledby="agent-label"
+                >
+                  {[
+                    ['codex', 'Codex'],
+                    ['claude', 'Claude Code'],
+                    ['grok', 'Grok'],
+                    ['opencode', 'OpenCode'],
+                    ['gh auth status', 'Identity check'],
+                  ].map(([id, name]) => (
+                    <button
+                      key={id}
+                      className="chip"
+                      aria-pressed={agent === id}
+                      onClick={() => setAgent(id)}
+                    >
+                      {name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              {commandBlock(
+                command,
+                'Choose a folder route to generate the command.',
+              )}
+            </section>
+            <section className="card">
+              <div className="card-header">
+                <div>
+                  <h2>Route ordinary Git</h2>
+                  <p>
+                    Run inside a checkout on {computer} to install the Git
+                    credential helper. HTTPS remotes then follow folder routes.
+                  </p>
+                </div>
+              </div>
+              {commandBlock('ghr setup')}
+              <p className="footnote">
+                Use <code>ghr setup --global</code> for machine-wide routing.
+                Unmapped folders stop instead of using another account. SSH
+                remotes keep using SSH keys.
+              </p>
+            </section>
           </div>
-          <p className="github-help">
-            Use <code>ghr setup --global</code> for machine-wide routing.
-            Unmapped folders stop instead of using another account. SSH remotes
-            use SSH keys.
-          </p>
-          {!state.mappings.length && (
-            <button className="secondary" onClick={() => go('github-routes')}>
-              Add a folder route first
-            </button>
-          )}
-        </div>
+        </>
       )}
       {routeForm && (
         <Modal

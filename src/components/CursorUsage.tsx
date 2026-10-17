@@ -3,7 +3,7 @@ import { ArrowUpRight, EyeOff, RefreshCw } from 'lucide-react';
 import { api, errorMessage, relative } from '../types';
 import type { Window } from '../types';
 import type { LimitDisplay } from '../limit-display';
-import { Meter, Modal } from './ui';
+import { Bar, Meter, Modal, tone } from './ui';
 
 type Usage = {
   connected: boolean;
@@ -88,27 +88,70 @@ export function CursorUsage({
     setHiddenWindows(display.accounts['cursor-subscription']?.windows || []);
     setOpen(true);
   }
+  const first = windows[0];
+  if (summary) {
+    if (!usage.connected) return null;
+    return (
+      <div className="sub-row">
+        <span className="provider-mark small cursor" aria-hidden="true">
+          C
+        </span>
+        <span className="sub-name">
+          <strong>Cursor</strong>
+          <small>{usage.plan || 'Subscription'}</small>
+        </span>
+        {usage.error ? (
+          <span className="sub-detail red">{usage.error}</span>
+        ) : allHidden || !first ? (
+          <span className="sub-detail">
+            {allHidden
+              ? 'Limits hidden'
+              : usage.unlimited
+                ? 'Unlimited'
+                : 'No limits reported'}
+          </span>
+        ) : (
+          <span className="sub-meter">
+            <Bar value={first.remaining} />
+            <strong className={tone(first.remaining)}>
+              {first.remaining == null
+                ? '—'
+                : `${Math.round(first.remaining)}%`}
+            </strong>
+          </span>
+        )}
+        <span className="sub-detail">
+          {first && !allHidden
+            ? `${first.label}${first.usedUsd !== null ? ` · ${money(first.usedUsd)} used` : ''} · resets ${relative(first.resetsAt)}`
+            : ''}
+        </span>
+        <button
+          className="icon-button"
+          disabled={busy}
+          onClick={() => request('POST', '/cursor/refresh')}
+          aria-label="Refresh Cursor subscription"
+          title="Refresh Cursor subscription"
+        >
+          <RefreshCw size={14} className={busy ? 'spin' : ''} />
+        </button>
+      </div>
+    );
+  }
   return (
-    <section
-      className={
-        summary ? 'summary-card cursor-usage' : 'provider-panel cursor-usage'
-      }
-    >
-      <div className="cursor-heading">
-        <span className="provider-mark small" aria-hidden="true">
+    <section className="card subscription">
+      <div className="subscription-heading">
+        <span className="provider-mark small cursor" aria-hidden="true">
           C
         </span>
         <h2>Cursor</h2>
         <span className="badge">{usage.plan || 'Subscription'}</span>
-        <button className="text-button" onClick={manage} disabled={!active}>
-          {usage.connected ? 'Manage subscription' : 'Connect Cursor'}
-        </button>
         {usage.connected && (
           <button
             className="icon-button"
             disabled={busy}
             onClick={() => request('POST', '/cursor/refresh')}
             aria-label="Refresh Cursor subscription"
+            title="Refresh Cursor subscription"
           >
             <RefreshCw size={15} className={busy ? 'spin' : ''} />
           </button>
@@ -116,13 +159,17 @@ export function CursorUsage({
       </div>
       {usage.connected ? (
         allHidden ? (
-          <p>
+          <p className="subscription-note">
             <EyeOff size={14} /> Limits hidden
           </p>
         ) : (
           <>
-            {usage.unlimited && <p>Unlimited access reported by Cursor</p>}
-            <div className="cursor-meters">
+            {usage.unlimited && (
+              <p className="subscription-note">
+                Unlimited access reported by Cursor
+              </p>
+            )}
+            <div className="subscription-meters">
               {windows.map((window) => (
                 <div key={window.id}>
                   <Meter window={window} now={Date.now()} />
@@ -140,7 +187,9 @@ export function CursorUsage({
               ))}
             </div>
             {!windows.length && !usage.unlimited && (
-              <p>Cursor has not reported usage limits for this subscription.</p>
+              <p className="subscription-note">
+                Cursor has not reported usage limits for this subscription.
+              </p>
             )}
             {usage.updatedAt && (
               <p className="field-help">
@@ -151,9 +200,10 @@ export function CursorUsage({
           </>
         )
       ) : (
-        <p>
-          Connect your Cursor dashboard session to track Enterprise or personal
-          subscription usage here.
+        <p className="subscription-note">
+          {active
+            ? 'Connect your Cursor dashboard session to track Enterprise or personal subscription usage.'
+            : 'Connect your proxy first, then link your Cursor dashboard session.'}
         </p>
       )}
       {usage.error && (
@@ -166,14 +216,23 @@ export function CursorUsage({
           {error}
         </p>
       )}
-      <a
-        className="text-button"
-        href="https://cursor.com/dashboard?tab=usage"
-        target="_blank"
-        rel="noreferrer"
-      >
-        Open Cursor dashboard <ArrowUpRight size={14} />
-      </a>
+      <div className="subscription-actions">
+        <button
+          className="secondary compact"
+          onClick={manage}
+          disabled={!active}
+        >
+          {usage.connected ? 'Manage' : 'Connect Cursor'}
+        </button>
+        <a
+          className="link-button"
+          href="https://cursor.com/dashboard?tab=usage"
+          target="_blank"
+          rel="noreferrer"
+        >
+          Cursor dashboard <ArrowUpRight size={13} />
+        </a>
+      </div>
       {open && (
         <Modal
           title="Cursor subscription"
