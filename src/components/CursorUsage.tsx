@@ -132,7 +132,7 @@ export function CursorUsage({
           aria-label="Refresh Cursor subscription"
           title="Refresh Cursor subscription"
         >
-          <RefreshCw size={14} className={busy ? 'spin' : ''} />
+          <RefreshCw size={16} className={busy ? 'spin' : ''} />
         </button>
       </div>
     );
@@ -153,14 +153,14 @@ export function CursorUsage({
             aria-label="Refresh Cursor subscription"
             title="Refresh Cursor subscription"
           >
-            <RefreshCw size={15} className={busy ? 'spin' : ''} />
+            <RefreshCw size={17} className={busy ? 'spin' : ''} />
           </button>
         )}
       </div>
       {usage.connected ? (
         allHidden ? (
           <p className="subscription-note">
-            <EyeOff size={14} /> Limits hidden
+            <EyeOff size={16} /> Limits hidden
           </p>
         ) : (
           <>
@@ -230,7 +230,7 @@ export function CursorUsage({
           target="_blank"
           rel="noreferrer"
         >
-          Cursor dashboard <ArrowUpRight size={13} />
+          Cursor dashboard <ArrowUpRight size={15} />
         </a>
       </div>
       {open && (

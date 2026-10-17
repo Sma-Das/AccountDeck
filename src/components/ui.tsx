@@ -14,7 +14,7 @@ export const tone = (value: number | null | undefined): Tone =>
         ? 'yellow'
         : 'green';
 
-export function Logo({ size = 28 }: { size?: number }) {
+export function Logo({ size = 32 }: { size?: number }) {
   return (
     <svg
       className="logo"
@@ -163,7 +163,7 @@ export function Modal({
             onClick={close}
             aria-label="Close dialog"
           >
-            <X size={18} />
+            <X size={21} />
           </button>
         </div>
         {children}

@@ -330,7 +330,7 @@ export function GitHubWorkspace({
       className="select-control computer-select"
       title="Computer whose GitHub accounts and routes you are managing"
     >
-      <Laptop size={14} />
+      <Laptop size={16} />
       <select
         aria-label="GitHub computer"
         value={machine}
@@ -357,7 +357,7 @@ export function GitHubWorkspace({
         disabled={!ready || busy}
         onClick={() => newRoute()}
       >
-        <Plus size={15} />
+        <Plus size={17} />
         Add route
       </button>
     ) : page === 'github-accounts' ? (
@@ -366,7 +366,7 @@ export function GitHubWorkspace({
         disabled={!ready}
         onClick={() => setLoginOpen(true)}
       >
-        <Plus size={15} />
+        <Plus size={17} />
         Add account
       </button>
     ) : page === 'github-machines' ? (
@@ -380,7 +380,7 @@ export function GitHubWorkspace({
           setPairing(true);
         }}
       >
-        <Plus size={15} />
+        <Plus size={17} />
         Pair computer
       </button>
     ) : null;
@@ -394,7 +394,7 @@ export function GitHubWorkspace({
         aria-label="Copy command"
         title="Copy command"
       >
-        <Copy size={14} />
+        <Copy size={16} />
       </button>
     </div>
   );
@@ -456,7 +456,7 @@ export function GitHubWorkspace({
               aria-label="Refresh GitHub"
               title="Reload accounts and routes"
             >
-              <RefreshCw size={15} className={loading ? 'spin' : ''} />
+              <RefreshCw size={17} className={loading ? 'spin' : ''} />
             </button>
             {primary}
           </>
@@ -464,7 +464,7 @@ export function GitHubWorkspace({
       />
       {error && (
         <div className="callout red" role="alert">
-          <CircleAlert size={16} />
+          <CircleAlert size={18} />
           <div>
             <strong>GitHub workspace unavailable on {computer}</strong>
             <p>{error}</p>
@@ -528,7 +528,7 @@ export function GitHubWorkspace({
                             }}
                           >
                             {count}
-                            <ArrowRight size={13} />
+                            <ArrowRight size={15} />
                           </button>
                         ) : (
                           'None'
@@ -555,11 +555,11 @@ export function GitHubWorkspace({
           </div>
           {!state.accounts.length && (
             <div className="empty-state card">
-              <Github size={22} />
+              <Github size={25} />
               <h3>No GitHub accounts on {computer}</h3>
               <p>Sign in with GitHub CLI on that computer, then refresh.</p>
               <button className="secondary" onClick={() => setLoginOpen(true)}>
-                <Plus size={14} />
+                <Plus size={16} />
                 Add account
               </button>
             </div>
@@ -574,7 +574,7 @@ export function GitHubWorkspace({
         <>
           <div className="toolbar standalone">
             <label className="search-field">
-              <Search size={15} />
+              <Search size={17} />
               <input
                 data-search
                 aria-label="Search GitHub routes"
@@ -588,7 +588,7 @@ export function GitHubWorkspace({
                   onClick={() => setQuery('')}
                   aria-label="Clear search"
                 >
-                  <X size={13} />
+                  <X size={15} />
                 </button>
               ) : (
                 <kbd>/</kbd>
@@ -629,7 +629,7 @@ export function GitHubWorkspace({
               {groups.map(([path, list]) => (
                 <article className="route-group" key={path}>
                   <div className="route-folder">
-                    <FolderGit2 size={16} />
+                    <FolderGit2 size={18} />
                     <div>
                       <h3>{basename(path)}</h3>
                       <code title={path}>{tilde(path)}</code>
@@ -641,7 +641,7 @@ export function GitHubWorkspace({
                       aria-label={`Add a repository route in ${path}`}
                       onClick={() => newRoute({ path })}
                     >
-                      <Plus size={14} />
+                      <Plus size={16} />
                     </button>
                   </div>
                   <ul>
@@ -652,7 +652,7 @@ export function GitHubWorkspace({
                         >
                           {route.repo ? (
                             <>
-                              <GitBranch size={13} />
+                              <GitBranch size={15} />
                               <span>{route.repo}</span>
                             </>
                           ) : (
@@ -676,7 +676,7 @@ export function GitHubWorkspace({
                               setRouteForm(route);
                             }}
                           >
-                            <Pencil size={14} />
+                            <Pencil size={16} />
                           </button>
                           <button
                             className="icon-button danger-hover"
@@ -688,7 +688,7 @@ export function GitHubWorkspace({
                               setRemoving(route);
                             }}
                           >
-                            <Trash2 size={14} />
+                            <Trash2 size={16} />
                           </button>
                         </span>
                       </li>
@@ -700,7 +700,7 @@ export function GitHubWorkspace({
           )}
           {!routes.length && (
             <div className="empty-state card">
-              <FolderGit2 size={22} />
+              <FolderGit2 size={25} />
               <h3>
                 {state.mappings.length
                   ? 'No matching routes'
@@ -723,7 +723,7 @@ export function GitHubWorkspace({
                 </button>
               ) : (
                 <button className="secondary" onClick={() => newRoute()}>
-                  <Plus size={14} />
+                  <Plus size={16} />
                   Add route
                 </button>
               )}
@@ -741,7 +741,7 @@ export function GitHubWorkspace({
               title="Copy path"
               onClick={() => void copy(state.config)}
             >
-              <Copy size={13} />
+              <Copy size={15} />
             </button>
           </div>
         </>
@@ -768,7 +768,7 @@ export function GitHubWorkspace({
                 disabled={scanning || busy}
               />
               <button className="primary" disabled={scanning || busy}>
-                <Search size={15} />
+                <Search size={17} />
                 {scanning ? 'Scanning…' : 'Scan'}
               </button>
             </div>
@@ -814,7 +814,7 @@ export function GitHubWorkspace({
             {shownRepositories?.map((repo) => (
               <article className="card repo" key={repo.path}>
                 <div className="repo-head">
-                  <FolderGit2 size={16} />
+                  <FolderGit2 size={18} />
                   <div>
                     <h3>{basename(repo.path)}</h3>
                     <code>{tilde(repo.path)}</code>
@@ -882,7 +882,7 @@ export function GitHubWorkspace({
           </div>
           {repositories?.length === 0 && (
             <div className="empty-state card">
-              <Search size={22} />
+              <Search size={25} />
               <h3>No repositories found</h3>
               <p>Try a parent folder or check the path.</p>
             </div>
@@ -908,7 +908,7 @@ export function GitHubWorkspace({
             ].map((item) => (
               <article className="machine-row" key={item.id}>
                 <span className="machine-icon">
-                  <Laptop size={16} />
+                  <Laptop size={18} />
                 </span>
                 <div>
                   <h3>
@@ -940,7 +940,7 @@ export function GitHubWorkspace({
                       setUnpairing({ name: item.id, url: item.detail });
                     }}
                   >
-                    <Trash2 size={15} />
+                    <Trash2 size={17} />
                   </button>
                 )}
               </article>
@@ -957,7 +957,7 @@ export function GitHubWorkspace({
         <>
           {!state.mappings.length && (
             <div className="callout">
-              <FolderGit2 size={16} />
+              <FolderGit2 size={18} />
               <div>
                 <strong>No folder routes on {computer}</strong>
                 <p>
@@ -969,7 +969,7 @@ export function GitHubWorkspace({
                 onClick={() => go('github-routes')}
               >
                 Add a route
-                <ArrowRight size={14} />
+                <ArrowRight size={16} />
               </button>
             </div>
           )}
@@ -1319,7 +1319,7 @@ export function GitHubWorkspace({
                 className="secondary compact"
                 onClick={() => void copy(login(loginHost))}
               >
-                <Copy size={14} />
+                <Copy size={16} />
                 Copy command
               </button>
             </div>

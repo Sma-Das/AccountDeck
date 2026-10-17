@@ -56,7 +56,7 @@ export function CommandPalette({
       }}
     >
       <div className="palette-input">
-        <Search size={16} />
+        <Search size={18} />
         <input
           autoFocus
           role="combobox"
@@ -112,9 +112,9 @@ export function CommandPalette({
                 onClick={() => run(command)}
                 tabIndex={-1}
               >
-                <command.icon size={16} />
+                <command.icon size={18} />
                 <span>{command.label}</span>
-                {position === index && <CornerDownLeft size={14} />}
+                {position === index && <CornerDownLeft size={16} />}
               </button>
             </div>
           );

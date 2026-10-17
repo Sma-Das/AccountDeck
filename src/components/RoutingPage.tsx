@@ -31,7 +31,7 @@ export function RoutingPage({
       <section className="panel">
         <div className="panel-title">
           <h2>Account selection</h2>
-          <Network size={18} />
+          <Network size={21} />
         </div>
         <div className="strategy-options">
           {[
@@ -100,7 +100,7 @@ export function RoutingPage({
       <section className="panel">
         <div className="panel-title">
           <h2>Account priorities</h2>
-          <ArrowDownUp size={18} />
+          <ArrowDownUp size={21} />
         </div>
         <p>Higher priorities receive new sessions first.</p>
         <div className="priority-list">
@@ -117,7 +117,7 @@ export function RoutingPage({
                 <small>
                   {account.disabled ? 'Paused' : `P${account.priority}`}
                 </small>
-                <Settings2 size={14} />
+                <Settings2 size={16} />
               </button>
             ))}
         </div>

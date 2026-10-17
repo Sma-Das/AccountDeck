@@ -130,7 +130,7 @@ export function AccountModal({
           disabled={busy}
           onClick={() => save({ disabled: !account.disabled })}
         >
-          {account.disabled ? <Play size={14} /> : <Pause size={14} />}
+          {account.disabled ? <Play size={16} /> : <Pause size={16} />}
           {account.disabled ? 'Resume account' : 'Pause account'}
         </button>
         <button

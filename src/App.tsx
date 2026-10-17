@@ -641,7 +641,7 @@ export default function App() {
           )}
         </span>
         <span className="capacity-foot">
-          <Clock3 size={12} />
+          <Clock3 size={14} />
           {c.allHidden
             ? 'Limits hidden'
             : c.reset
@@ -809,7 +809,7 @@ export default function App() {
             ))
           ) : (
             <div className="quota-missing">
-              {hidden ? <EyeOff size={14} /> : <CircleAlert size={14} />}
+              {hidden ? <EyeOff size={16} /> : <CircleAlert size={16} />}
               {hidden
                 ? 'Limits hidden'
                 : account.quota?.error || 'Quota has not been loaded'}
@@ -834,7 +834,7 @@ export default function App() {
             }
           >
             <RefreshCw
-              size={15}
+              size={17}
               className={loadingIds.has(account.id) ? 'spin' : ''}
             />
           </button>
@@ -844,14 +844,14 @@ export default function App() {
             title="Manage account"
             onClick={() => setSelected(account)}
           >
-            <Settings2 size={15} />
+            <Settings2 size={17} />
           </button>
         </div>
         <CreditAccessNote account={account} />
         {!hidden &&
           ((account.quota?.error && accountWindows.length > 0) || stale) && (
             <div className="row-warning">
-              <Clock3 size={12} />
+              <Clock3 size={14} />
               {account.quota?.error ||
                 'Quota is over 5 minutes old. Refresh for current limits.'}
             </div>
@@ -862,13 +862,13 @@ export default function App() {
 
   const refreshButton = (
     <button className="secondary" onClick={refreshAll} disabled={busy}>
-      <RefreshCw size={14} className={busy ? 'spin' : ''} />
+      <RefreshCw size={16} className={busy ? 'spin' : ''} />
       {busy ? 'Refreshing…' : 'Refresh quotas'}
     </button>
   );
   const addButton = (
     <button className="primary" onClick={() => setAddProvider('claude')}>
-      <Plus size={15} />
+      <Plus size={17} />
       Add AI account
     </button>
   );
@@ -886,7 +886,7 @@ export default function App() {
   if (initializing) {
     return (
       <main className="connection-startup" aria-busy={initializing}>
-        <Logo size={40} />
+        <Logo size={46} />
         <h1>
           {startupError
             ? 'AccountDeck could not start'
@@ -949,7 +949,7 @@ export default function App() {
           className="palette-trigger"
           onClick={() => setPaletteOpen(true)}
         >
-          <Search size={14} />
+          <Search size={16} />
           <span>Jump to…</span>
           <kbd>⌘K</kbd>
         </button>
@@ -966,7 +966,7 @@ export default function App() {
                     aria-current={page === id ? 'page' : undefined}
                     onClick={() => go(id)}
                   >
-                    <Icon size={16} />
+                    <Icon size={18} />
                     <span>{pages[id].label}</span>
                     {id === 'quota' && attention.length > 0 && (
                       <small
@@ -996,7 +996,7 @@ export default function App() {
             <span className="proxy-card-top">
               <span className="pulse" />
               <strong>{proxyLabel}</strong>
-              <ArrowUpRight size={14} />
+              <ArrowUpRight size={16} />
             </span>
             <span className="proxy-card-detail">
               {connected
@@ -1013,7 +1013,7 @@ export default function App() {
               rel="noreferrer"
             >
               Docs
-              <ArrowUpRight size={12} />
+              <ArrowUpRight size={14} />
             </a>
             <a
               href="https://github.com/router-for-me/CLIProxyAPI"
@@ -1021,7 +1021,7 @@ export default function App() {
               rel="noreferrer"
             >
               CLIProxyAPI
-              <ArrowUpRight size={12} />
+              <ArrowUpRight size={14} />
             </a>
             <button
               className="icon-button"
@@ -1029,7 +1029,7 @@ export default function App() {
               aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} theme`}
               title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} theme`}
             >
-              {theme === 'dark' ? <Sun size={15} /> : <Moon size={15} />}
+              {theme === 'dark' ? <Sun size={17} /> : <Moon size={17} />}
             </button>
           </div>
         </div>
@@ -1044,16 +1044,16 @@ export default function App() {
             aria-controls="sidebar"
             aria-expanded={mobileNav}
           >
-            <Menu size={19} />
+            <Menu size={22} />
           </button>
-          <Logo size={24} />
+          <Logo size={28} />
           <strong>{pages[page].title}</strong>
           <button
             className="icon-button"
             onClick={() => setPaletteOpen(true)}
             aria-label="Open command menu"
           >
-            <Search size={17} />
+            <Search size={20} />
           </button>
         </header>
         <main id="main-content" tabIndex={-1}>
@@ -1066,7 +1066,7 @@ export default function App() {
           )}
           {!isGitHub && startupError && (
             <div className="callout red" role="alert">
-              <CircleAlert size={16} />
+              <CircleAlert size={18} />
               <div>
                 <strong>AI proxy unavailable</strong>
                 <p>{startupError}</p>
@@ -1081,7 +1081,7 @@ export default function App() {
           )}
           {!isGitHub && !connected && !startupError && (
             <div className="callout">
-              <Unplug size={16} />
+              <Unplug size={18} />
               <div>
                 <strong>You’re looking at sample AI data</strong>
                 <p>
@@ -1094,7 +1094,7 @@ export default function App() {
                 onClick={() => setConnectOpen(true)}
               >
                 Connect proxy
-                <ArrowRight size={14} />
+                <ArrowRight size={16} />
               </button>
             </div>
           )}
@@ -1103,7 +1103,7 @@ export default function App() {
               <div className="stat-grid">
                 <button className="stat" onClick={() => go('quota')}>
                   <span className="stat-label">
-                    <Gauge size={14} />
+                    <Gauge size={16} />
                     AI accounts ready
                   </span>
                   <strong>
@@ -1127,7 +1127,7 @@ export default function App() {
                   }}
                 >
                   <span className="stat-label">
-                    <Clock3 size={14} />
+                    <Clock3 size={16} />
                     Next quota reset
                   </span>
                   <strong>
@@ -1151,7 +1151,7 @@ export default function App() {
                 </button>
                 <button className="stat" onClick={() => go('github-accounts')}>
                   <span className="stat-label">
-                    <Github size={14} />
+                    <Github size={16} />
                     GitHub accounts
                   </span>
                   <strong>
@@ -1165,7 +1165,7 @@ export default function App() {
                 </button>
                 <button className="stat" onClick={() => go('github-routes')}>
                   <span className="stat-label">
-                    <FolderGit2 size={14} />
+                    <FolderGit2 size={16} />
                     Folder routes
                   </span>
                   <strong>
@@ -1179,7 +1179,7 @@ export default function App() {
                 </button>
                 <button className="stat" onClick={() => go('github-machines')}>
                   <span className="stat-label">
-                    <Laptop size={14} />
+                    <Laptop size={16} />
                     Computers
                   </span>
                   <strong>{github?.computers ?? '—'}</strong>
@@ -1202,7 +1202,7 @@ export default function App() {
                     </div>
                     <button className="link-button" onClick={() => go('quota')}>
                       All quotas
-                      <ArrowRight size={14} />
+                      <ArrowRight size={16} />
                     </button>
                   </div>
                   {activeProviders.length ? (
@@ -1216,14 +1216,14 @@ export default function App() {
                     </div>
                   ) : (
                     <div className="empty-state">
-                      <Gauge size={22} />
+                      <Gauge size={25} />
                       <h3>No AI accounts yet</h3>
                       <p>Add an account to start tracking its quota.</p>
                       <button
                         className="secondary"
                         onClick={() => setAddProvider('claude')}
                       >
-                        <Plus size={14} />
+                        <Plus size={16} />
                         Add AI account
                       </button>
                     </div>
@@ -1267,7 +1267,7 @@ export default function App() {
                       </ul>
                     ) : (
                       <div className="all-clear">
-                        <CircleCheck size={18} />
+                        <CircleCheck size={21} />
                         Every active account has quota to spare.
                       </div>
                     )}
@@ -1280,7 +1280,7 @@ export default function App() {
                         }}
                       >
                         {attention.length - 6} more
-                        <ArrowRight size={14} />
+                        <ArrowRight size={16} />
                       </button>
                     )}
                   </section>
@@ -1299,12 +1299,12 @@ export default function App() {
                         aria-label="Copy endpoint"
                         title="Copy endpoint"
                       >
-                        <Copy size={14} />
+                        <Copy size={16} />
                       </button>
                     </div>
                     <button className="link-button" onClick={() => go('setup')}>
                       Set up a client
-                      <ArrowRight size={14} />
+                      <ArrowRight size={16} />
                     </button>
                   </section>
                 </div>
@@ -1320,9 +1320,8 @@ export default function App() {
                   onClick={() => setFilter('all')}
                 >
                   <span className="capacity-head">
-                    <LayoutGrid size={16} />
+                    <LayoutGrid size={18} />
                     <strong>All providers</strong>
-                    <small>{accounts.length} accounts</small>
                   </span>
                   <span className="capacity-value">
                     <strong
@@ -1338,7 +1337,7 @@ export default function App() {
                     ))}
                   </span>
                   <span className="capacity-foot">
-                    <Clock3 size={12} />
+                    <Clock3 size={14} />
                     {syncLabel}
                   </span>
                 </button>
@@ -1408,7 +1407,7 @@ export default function App() {
                 )}
                 <div className="toolbar">
                   <label className="search-field">
-                    <Search size={15} />
+                    <Search size={17} />
                     <input
                       data-search
                       placeholder="Search accounts"
@@ -1422,7 +1421,7 @@ export default function App() {
                         onClick={() => setQuery('')}
                         aria-label="Clear search"
                       >
-                        <X size={13} />
+                        <X size={15} />
                       </button>
                     ) : (
                       <kbd>/</kbd>
@@ -1430,7 +1429,7 @@ export default function App() {
                   </label>
                   <div className="toolbar-group">
                     <label className="select-control">
-                      <ArrowDownUp size={13} />
+                      <ArrowDownUp size={15} />
                       <select
                         aria-label="Sort accounts"
                         value={sort}
@@ -1449,7 +1448,7 @@ export default function App() {
                         aria-label="List layout"
                         title="List layout"
                       >
-                        <List size={15} />
+                        <List size={17} />
                       </button>
                       <button
                         aria-pressed={view === 'cards'}
@@ -1457,7 +1456,7 @@ export default function App() {
                         aria-label="Card layout"
                         title="Card layout"
                       >
-                        <LayoutGrid size={15} />
+                        <LayoutGrid size={17} />
                       </button>
                     </div>
                     <button
@@ -1467,7 +1466,7 @@ export default function App() {
                       aria-label={reveal ? 'Hide emails' : 'Show emails'}
                       title={reveal ? 'Hide emails' : 'Show emails'}
                     >
-                      {reveal ? <EyeOff size={15} /> : <Eye size={15} />}
+                      {reveal ? <EyeOff size={17} /> : <Eye size={17} />}
                     </button>
                     <button
                       className="secondary compact"
@@ -1475,7 +1474,7 @@ export default function App() {
                       aria-label="Limit display"
                       title="Limit display"
                     >
-                      <SlidersHorizontal size={14} />
+                      <SlidersHorizontal size={16} />
                       <span className="hide-sm">Limit display</span>
                     </button>
                   </div>
@@ -1483,7 +1482,7 @@ export default function App() {
                 <div className={view === 'cards' ? 'account-cards' : 'ledger'}>
                   {visible.length === 0 ? (
                     <div className="empty-state">
-                      <Search size={22} />
+                      <Search size={25} />
                       <h3>
                         {accounts.length
                           ? 'No matching accounts'
@@ -1586,7 +1585,7 @@ export default function App() {
                         className="secondary compact"
                         onClick={() => setAddProvider(provider)}
                       >
-                        <Plus size={14} />
+                        <Plus size={16} />
                         Connect another {info(provider).name} account
                       </button>
                     </section>
@@ -1620,7 +1619,7 @@ export default function App() {
                         >
                           <Brand provider={provider} small />
                           {info(provider).name}
-                          <Plus size={14} />
+                          <Plus size={16} />
                         </button>
                       ))}
                   </div>
@@ -1674,14 +1673,14 @@ export default function App() {
           className={`toast ${toast.error ? 'error' : ''}`}
           role={toast.error ? 'alert' : 'status'}
         >
-          {toast.error ? <CircleAlert size={16} /> : <Check size={16} />}
+          {toast.error ? <CircleAlert size={18} /> : <Check size={18} />}
           <span>{toast.text}</span>
           <button
             className="icon-button"
             onClick={() => setToast(null)}
             aria-label="Dismiss notification"
           >
-            <X size={14} />
+            <X size={16} />
           </button>
         </div>
       )}

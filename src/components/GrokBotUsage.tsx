@@ -102,7 +102,7 @@ export function GrokBotUsage({
           aria-label="Reload Grok Bot usage"
           title="Reload Grok Bot usage"
         >
-          <RefreshCw size={14} className={busy ? 'spin' : ''} />
+          <RefreshCw size={16} className={busy ? 'spin' : ''} />
         </button>
       </div>
     );
@@ -121,12 +121,12 @@ export function GrokBotUsage({
           aria-label="Reload Grok Bot usage"
           title="Reload Grok Bot usage"
         >
-          <RefreshCw size={15} className={busy ? 'spin' : ''} />
+          <RefreshCw size={17} className={busy ? 'spin' : ''} />
         </button>
       </div>
       {hidden ? (
         <p className="subscription-note">
-          <EyeOff size={14} /> Limits hidden
+          <EyeOff size={16} /> Limits hidden
         </p>
       ) : (
         windows.length > 0 && (

@@ -104,7 +104,7 @@ export function SetupPage({
             }}
           >
             {id === 'api' ? (
-              <Terminal size={17} />
+              <Terminal size={20} />
             ) : (
               <Brand provider={id} small />
             )}
@@ -116,7 +116,7 @@ export function SetupPage({
         <section className="panel">
           <div className="panel-title">
             <h2>Connection settings</h2>
-            <Link2 size={18} />
+            <Link2 size={21} />
           </div>
           <label>
             API endpoint
@@ -132,7 +132,7 @@ export function SetupPage({
                 }
                 aria-label="Copy endpoint"
               >
-                <Copy size={14} />
+                <Copy size={16} />
               </button>
             </div>
           </label>
@@ -210,7 +210,7 @@ export function SetupPage({
                 {client === 'codex' ? '~/.codex/config.toml' : 'Terminal'}
               </span>
               <button className="text-button" onClick={() => copy(snippet)}>
-                <Copy size={13} />
+                <Copy size={15} />
                 Copy
               </button>
             </div>
@@ -228,7 +228,7 @@ export function SetupPage({
                     copy(`export CLIPROXY_API_KEY=${q(key)}\ncodex`)
                   }
                 >
-                  <Copy size={13} />
+                  <Copy size={15} />
                   Copy
                 </button>
               </div>
@@ -248,7 +248,7 @@ export function SetupPage({
             rel="noreferrer"
           >
             Read the setup documentation
-            <ArrowUpRight size={12} />
+            <ArrowUpRight size={14} />
           </a>
         </section>
       </div>
