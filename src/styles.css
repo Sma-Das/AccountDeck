@@ -2645,3 +2645,38 @@ details label {
     grid-column: 1 / -1;
   }
 }
+
+.provider-summary > .grok-bot-usage {
+  grid-column: span 2;
+  border-left: 0;
+  border-top: 1px solid var(--line);
+  padding: 18px 20px;
+}
+.provider-summary:has(> .grok-bot-usage) > .cursor-usage {
+  grid-column: span 2;
+}
+.grok-bot-usage h2 {
+  font-size: 14px;
+  font-weight: 600;
+}
+.grok-bot-usage .cursor-heading > .icon-button {
+  margin-left: auto;
+}
+.grok-bot-usage .cursor-meters {
+  margin: 16px 0 10px;
+}
+.grok-bot-usage p {
+  font-size: 13px;
+  margin-top: 12px;
+}
+.grok-bot-usage .field-help {
+  margin: 0;
+}
+.field-help.stale {
+  color: var(--yellow);
+}
+@media (max-width: 1100px) {
+  .provider-summary:has(> .grok-bot-usage) > .cursor-usage {
+    border-left: 0;
+  }
+}

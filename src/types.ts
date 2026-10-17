@@ -89,10 +89,10 @@ export const providerInfo: Record<
     description: 'Google OAuth',
   },
   xai: {
-    name: 'xAI',
+    name: 'Grok Build',
     color: '#deded9',
     mark: '𝕏',
-    description: 'Grok subscription',
+    description: 'Grok CLI subscription',
   },
   kimi: {
     name: 'Kimi',
@@ -106,7 +106,15 @@ export const providerInfo: Record<
     mark: 'C',
     description: 'Cursor subscription',
   },
+  'grok-bot': {
+    name: 'Grok Bot',
+    color: '#deded9',
+    mark: '𝕏',
+    description: 'Grok Bot app subscription',
+  },
 };
+// Tracked on this Mac rather than through the proxy, so they have no OAuth flow.
+export const localSubscriptions = ['cursor', 'grok-bot'];
 export const info = (provider: string) =>
   providerInfo[provider] || {
     name: provider,

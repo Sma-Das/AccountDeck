@@ -108,16 +108,22 @@ The Cursor card on Quota management and AI providers tracks a Cursor subscriptio
 
 The server stores the session in `~/Library/Application Support/CLIProxy Console/cursor-connection.json` with owner-only file permissions, outside installed releases and git worktrees. The browser does not retain the token. Usage refreshes once a minute while the card is open, and its refresh button requests an immediate update. **Manage subscription** lets you reconnect an expired session or disconnect and delete the saved session. This uses Cursor's undocumented dashboard endpoint, which may change. It does not require a team admin API key or export the subscription into CLIProxyAPI.
 
+### Grok Bot subscription usage
+
+The Grok Bot card on Quota management and AI providers shows the weekly limit for a Grok Bot subscription. It is separate from the Grok Build accounts on the proxy, which use xAI OAuth through CLIProxyAPI. Install and sign in to the Grok Bot desktop app on the Mac that runs AccountDeck. No connection step is needed.
+
+AccountDeck reads the usage reading that Grok Bot saves in `~/Library/Application Support/Grok Bot/sand-client-persistence`. It reads only that cache. It never reads Grok Bot's encrypted credentials or the Keychain, and it sends no network requests. The reading is as current as Grok Bot's last refresh, and the card shows when it was saved. Open Grok Bot to update a stale reading. When a weekly reset passes after the last reading, the card marks the remaining quota unknown rather than showing last week's value. Set `GROK_BOT_DATA_DIR` to read another data directory, or `none` to turn the card off.
+
 ### Hide limits
 
-Select **Limit display** on Quota management to hide a provider's limits, such as Grok frontier access. **Manage account** can hide all limits for one account or selected model windows. Cursor's **Manage subscription** offers the same controls for its model and spending pools. Settings persist in the current browser and are scoped to the connected proxy. Hidden windows are omitted from capacity summaries, reset ordering, and the next-reset display. Hiding limits changes the display; proxy routing and automatic priority continue to use real provider data.
+Select **Limit display** on Quota management to hide a provider's limits, such as Grok frontier access. **Manage account** can hide all limits for one account or selected model windows. Cursor's **Manage subscription** offers the same controls for its model and spending pools. Grok Bot appears in **Limit display** beside the proxy providers. Settings persist in the current browser and are scoped to the connected proxy. Hidden windows are omitted from capacity summaries, reset ordering, and the next-reset display. Hiding limits changes the display; proxy routing and automatic priority continue to use real provider data.
 
 For remote proxy connections, enable remote management in CLIProxyAPI. See the [v8 management API documentation](https://help.router-for.me/management/apiv8) for authentication and configuration. Earlier releases that only expose `/v0/management` are not supported.
 
 ## What works
 
 - **Quota management:** per-account remaining percentages, reset countdowns, aggregate provider summaries, search, provider filters, ledger and card layouts, and sorting by reset time, remaining quota, or priority. Stale values and failed refreshes are labeled.
-- **Provider management:** start, poll, and cancel OAuth login for Claude, Codex, Antigravity, xAI, and Kimi. Forward a matching callback URL when signing in from another machine.
+- **Provider management:** start, poll, and cancel OAuth login for Claude, Codex, Antigravity, xAI (shown as Grok Build), and Kimi. Forward a matching callback URL when signing in from another machine.
 - **Account controls:** pause or resume accounts and edit routing priority through the management API.
 - **Routing:** configure round robin, fill first, or existing weighted round robin; enable session affinity.
 - **Expiring quota:** enable **Auto-prioritize · 15m** on the quota page to prefer unused Claude, Codex, and Grok quota before reset.
