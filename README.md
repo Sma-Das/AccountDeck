@@ -126,7 +126,7 @@ For remote proxy connections, enable remote management in CLIProxyAPI. See the [
 - **Provider management:** start, poll, and cancel OAuth login for Claude, Codex, Antigravity, xAI (shown as Grok Build), and Kimi. Forward a matching callback URL when signing in from another machine.
 - **Account controls:** pause or resume accounts and edit routing priority through the management API.
 - **Routing:** configure round robin, fill first, or existing weighted round robin; enable session affinity.
-- **Expiring quota:** enable **Auto-prioritize · 15m** on the quota page to prefer unused Claude, Codex, and Grok quota before reset.
+- **Expiring quota:** enable **Auto-prioritize expiring quota** on the quota page to prefer unused Claude, Codex, and Grok quota before reset.
 - **Client setup:** discover account models and copy configuration for Claude Code, Codex, or an OpenAI-compatible cURL request. Client configuration files are not edited automatically.
 - **Overview:** inspect the proxy’s account readiness, next weekly reset, and client endpoint.
 
@@ -136,7 +136,7 @@ Percentages always mean **remaining quota**. Provider totals add account percent
 
 ## Auto-prioritize expiring quota
 
-Turn on **Auto-prioritize · 15m** on the quota page. The server checks live Claude, Codex, and Grok quotas every minute, including while the browser is closed. An account with remaining quota and a reset within 15 minutes gets a temporary priority above the other accounts for that provider. When several accounts are due, the earliest reset gets the highest priority. This sends your normal requests to those accounts; it does not generate requests or change the requested model.
+Turn on **Auto-prioritize expiring quota** on the quota page. The server checks live Claude, Codex, and Grok quotas every minute, including while the browser is closed. An account with remaining quota and a reset within 15 minutes gets a temporary priority above the other accounts for that provider. When several accounts are due, the earliest reset gets the highest priority. This sends your normal requests to those accounts; it does not generate requests or change the requested model.
 
 The console restores the saved priority after reset, depletion, pausing, a quota-check failure, or disabling the feature. Changing a boosted account's priority in the console changes the priority that will be restored. External priority edits take precedence for the current window. Existing affinity bindings stay bound to their accounts.
 
@@ -166,7 +166,7 @@ npm run format:check
 
 Tests cover credential redaction, management authentication, request-origin checks, session invalidation, quota normalization and provider failures, unsupported accounts, v8 mutation payloads, model discovery, and OAuth callback validation. They use a mock proxy and do not make requests to your provider accounts.
 
-The frontend uses React, TypeScript, Vite, and Lucide icons. The backend uses Express. The integration follows [CLIProxyAPI’s v8 contract](https://help.router-for.me/management/apiv8), its [management console’s quota implementations](https://github.com/router-for-me/Cli-Proxy-API-Management-Center/tree/main/src/features/quota/providers), and the [official Codex configuration reference](https://developers.openai.com/codex/config-reference/).
+The frontend uses React, TypeScript, Vite, Lucide icons, and the bundled Barlow typeface. Its visual direction comes from the [frontend-design skill](.claude/skills/frontend-design/SKILL.md): colour marks state only (green normal, amber caution, red warning, cyan selectable), and quota levels use segmented meters. The backend uses Express. The integration follows [CLIProxyAPI’s v8 contract](https://help.router-for.me/management/apiv8), its [management console’s quota implementations](https://github.com/router-for-me/Cli-Proxy-API-Management-Center/tree/main/src/features/quota/providers), and the [official Codex configuration reference](https://developers.openai.com/codex/config-reference/).
 
 ## Source and migration
 

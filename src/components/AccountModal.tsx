@@ -57,8 +57,8 @@ export function AccountModal({
               : masked(account.email || account.name)}
           </strong>
           <p>
-            {info(account.provider).name} · {account.plan || 'OAuth account'}
-            {account.nativeSource && ` · ${account.nativeSource}`}
+            {info(account.provider).name}, {account.plan || 'OAuth account'}
+            {account.nativeSource && `, from ${account.nativeSource}`}
           </p>
         </div>
       </div>

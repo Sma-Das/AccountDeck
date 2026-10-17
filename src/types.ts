@@ -130,7 +130,7 @@ export function relative(date: string | null | undefined, now = Date.now()) {
   if (!date) return 'No reset scheduled';
   const diff = Date.parse(date) - now;
   if (!Number.isFinite(diff)) return 'Reset time unavailable';
-  if (diff <= 0) return 'Reset due · refresh quota';
+  if (diff <= 0) return 'Reset due. Refresh quota.';
   const hours = Math.ceil(diff / 3600000);
   return diff < 3600000
     ? `in ${Math.ceil(diff / 60000)}m`
