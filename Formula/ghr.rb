@@ -10,9 +10,10 @@ class Ghr < Formula
   depends_on "python@3.13"
 
   def install
-    cd "packages/github-router" do
-      virtualenv_install_with_resources
-    end
+    # The package lives in a subdirectory; virtualenv_install_with_resources
+    # always installs buildpath, so point pip at the package directly.
+    venv = virtualenv_create(libexec, "python3.13")
+    venv.pip_install_and_link buildpath/"packages/github-router"
   end
 
   test do
