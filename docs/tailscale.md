@@ -54,7 +54,22 @@ The second request creates an independent AccountDeck workspace session and a li
 
 Without a configured connection, select **Connect proxy** and enter the existing CLIProxyAPI instance's URL and management key. `localhost` in that form refers to the Mac hosting the console because its backend makes the connection, not the phone or tablet viewing the page. Client setup snippets must use a proxy API URL reachable from the machine where the coding client runs.
 
-The installer pins `CONSOLE_ORIGIN` to the HTTPS MagicDNS URL. This allows valid browser requests through the reverse proxy while rejecting other origins. Session cookies use Secure when this HTTPS origin is configured. No provider or management keys are placed in the launch agent or deployment state.
+The installer pins `CONSOLE_ORIGIN` to the HTTPS MagicDNS URL and any origins in `CLIPROXY_PUBLIC_ORIGINS`. This allows valid browser requests through the reverse proxy while rejecting other origins. Session cookies use Secure when every configured origin uses HTTPS. No provider or management keys are placed in the launch agent or deployment state.
+
+## Use a custom domain
+
+A domain such as `account.example.com` can point at the same backend while staying reachable only over Tailscale:
+
+1. Create a DNS-only A record (not proxied through a CDN) for the hostname with this Mac's Tailscale IPv4 address from `tailscale ip -4`. Devices outside the tailnet can resolve the name but cannot connect to it.
+2. Terminate TLS for the hostname with a reverse proxy on loopback that gets its certificate by DNS-01 challenge, such as Caddy with the Cloudflare DNS module, and proxy to `127.0.0.1:4319`. Preserve the `Host` header.
+3. Forward the tailnet's HTTPS port to that proxy, for example `tailscale serve --bg --tcp=443 tcp://127.0.0.1:9443`. Keep the MagicDNS route on port 8443.
+4. Reinstall with the extra origin. The installer saves it, so later updates keep it:
+
+```sh
+CLIPROXY_PUBLIC_ORIGINS=https://account.example.com npm run service:install
+```
+
+Separate several origins with commas. Set `CLIPROXY_PUBLIC_ORIGINS=` to an empty value to remove them.
 
 To stop sharing and remove the launch agent:
 

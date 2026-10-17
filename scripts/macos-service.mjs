@@ -166,6 +166,22 @@ async function install() {
     throw new Error(
       'Uninstall the current service before changing its ports or MagicDNS hostname.',
     );
+  // Extra HTTPS origins, such as a custom domain proxied to this backend.
+  const publicOrigins = (
+    process.env.CLIPROXY_PUBLIC_ORIGINS ??
+    (previous?.publicOrigins || []).join(',')
+  )
+    .split(',')
+    .map((value) => value.trim())
+    .filter(Boolean)
+    .map((value) => {
+      const url = new URL(value);
+      if (url.protocol !== 'https:' || url.origin !== value.replace(/\/$/, ''))
+        throw new Error(
+          `CLIPROXY_PUBLIC_ORIGINS entries must be HTTPS origins without a path: ${value}`,
+        );
+      return url.origin;
+    });
   const state = {
     label,
     servicePort,
@@ -174,6 +190,7 @@ async function install() {
     tailscale,
     target: `http://127.0.0.1:${servicePort}`,
     origin: `https://${dnsName}${httpsPort === 443 ? '' : `:${httpsPort}`}`,
+    publicOrigins,
     connectionFile:
       process.env.CONSOLE_CONNECTION_FILE || previous?.connectionFile || null,
   };
@@ -196,7 +213,7 @@ async function install() {
 <key>Label</key><string>${label}</string>
 <key>ProgramArguments</key><array><string>${xml(node)}</string><string>${xml(join(release, 'server', 'index.js'))}</string></array>
 <key>WorkingDirectory</key><string>${xml(release)}</string>
-<key>EnvironmentVariables</key><dict><key>NODE_ENV</key><string>production</string><key>PORT</key><string>${servicePort}</string><key>GHR_PYTHON</key><string>${xml(python)}</string><key>PATH</key><string>${xml(`${dirname(gh)}:${dirname(node)}:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin`)}</string><key>CONSOLE_ORIGIN</key><string>${xml(state.origin)}</string>${state.connectionFile ? `<key>CONSOLE_CONNECTION_FILE</key><string>${xml(state.connectionFile)}</string>` : ''}</dict>
+<key>EnvironmentVariables</key><dict><key>NODE_ENV</key><string>production</string><key>PORT</key><string>${servicePort}</string><key>GHR_PYTHON</key><string>${xml(python)}</string><key>PATH</key><string>${xml(`${dirname(gh)}:${dirname(node)}:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin`)}</string><key>CONSOLE_ORIGIN</key><string>${xml([state.origin, ...publicOrigins].join(','))}</string>${state.connectionFile ? `<key>CONSOLE_CONNECTION_FILE</key><string>${xml(state.connectionFile)}</string>` : ''}</dict>
 <key>RunAtLoad</key><true/><key>KeepAlive</key><true/><key>ThrottleInterval</key><integer>10</integer>
 <key>StandardOutPath</key><string>${xml(join(runtime, 'stdout.log'))}</string>
 <key>StandardErrorPath</key><string>${xml(join(runtime, 'stderr.log'))}</string>
@@ -236,7 +253,7 @@ async function install() {
     throw error;
   }
   console.log(
-    `\nAccountDeck is available at ${state.origin}\nIt starts at login and restarts automatically. Each device must be connected to your Tailscale network.`,
+    `\nAccountDeck is available at ${[state.origin, ...publicOrigins].join(' and ')}\nIt starts at login and restarts automatically. Each device must be connected to your Tailscale network.`,
   );
 }
 async function main() {
@@ -255,7 +272,7 @@ async function main() {
   }
   if (action === 'status') {
     console.log(
-      `URL: ${state.origin}\nLocal backend: ${state.target}\nRelease: ${state.release}\nLogs: ${runtime}`,
+      `URL: ${[state.origin, ...(state.publicOrigins || [])].join(', ')}\nLocal backend: ${state.target}\nRelease: ${state.release}\nLogs: ${runtime}`,
     );
     console.log(run('/bin/launchctl', ['print', `${domain}/${label}`]));
     console.log(run(state.tailscale, ['serve', 'status']));
