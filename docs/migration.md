@@ -18,6 +18,15 @@ The public AccountDeck repository contains the combined application and the comp
 
 AccountDeck keeps the service label `com.cliproxy.console`, the `CLIProxy Console` data directory, and its current Tailscale endpoint. Existing GitHub router services, paired computers, credentials, folder mappings, and browser preferences continue to use their existing locations. Repository migration does not migrate credential stores.
 
-Existing Homebrew installations can continue to run from the archived tap. New installs use the AccountDeck tap. To switch an existing installation, first confirm that its launch agents and Git credential helpers use Homebrew's stable `opt/ghr` path. Then install the AccountDeck formula and run `ghr setup` for any helper that points at an older version-specific path.
+The `sma-das/multi-github-account` Homebrew tap is deprecated and receives no updates. Move existing installations to the AccountDeck tap. First confirm that launch agents and Git credential helpers use Homebrew's stable `bin/ghr` or `opt/ghr` path, then reinstall:
+
+```sh
+brew tap Sma-Das/accountdeck https://github.com/Sma-Das/AccountDeck.git
+brew uninstall sma-das/multi-github-account/ghr
+brew install --HEAD Sma-Das/accountdeck/ghr
+brew untap sma-das/multi-github-account
+```
+
+Restart any `ghr ui` launch agents afterwards. Run `ghr setup` for any credential helper that points at an older version-specific path. Folder routes, paired computers, and browser sessions are kept, because they live in `~/.config/ghr`.
 
 The legacy static router demo remains a separate deployment. The source is included under the router package; it does not expose the live AccountDeck server.

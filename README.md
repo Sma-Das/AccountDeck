@@ -4,7 +4,7 @@
 
 AccountDeck combines GitHub account routing with AI provider and subscription management. One React workspace manages local GitHub identities, folder and remote routes, repository scans, paired computers, agent commands, proxy quotas, Cursor Enterprise usage, and limit visibility.
 
-The GitHub backend includes the MIT-licensed routing library from [multi-github-account](https://github.com/Sma-Das/multi-github-account). The full CLI and paired-computer service are maintained here in [packages/github-router](packages/github-router/README.md). It uses the same `~/.config/ghr/config.json` and `machines.json`, so existing routes and computer pairings appear immediately. The existing `ghr` CLI and Git credential helper continue to own command execution and credentials.
+The GitHub backend includes the MIT-licensed routing library from the deprecated [multi-github-account](https://github.com/Sma-Das/multi-github-account) repository. The full CLI and paired-computer service are maintained here in [packages/github-router](packages/github-router/README.md). It uses the same `~/.config/ghr/config.json` and `machines.json`, so existing routes and computer pairings appear immediately. The existing `ghr` CLI and Git credential helper continue to own command execution and credentials.
 
 ## GitHub workspace
 
@@ -170,6 +170,6 @@ The frontend uses React, TypeScript, Vite, and Lucide icons. The backend uses Ex
 
 ## Source and migration
 
-AccountDeck is the combined successor to `Sma-Das/cliproxyapi` and `Sma-Das/multi-github-account`. Their histories remain in the archived repositories. This public repository starts with a source-only commit. Private runtime configuration and credentials stay outside the checkout. See [migration details](docs/migration.md) for source revisions and package layout.
+AccountDeck is the combined successor to `Sma-Das/cliproxyapi` and `Sma-Das/multi-github-account`. Both are deprecated and archived on GitHub. Their histories remain in the archived repositories, and their Homebrew tap is no longer maintained. This public repository starts with a source-only commit. Private runtime configuration and credentials stay outside the checkout. See [migration details](docs/migration.md) for source revisions and package layout.
 
 AccountDeck and the included GitHub router use the [MIT license](LICENSE).
