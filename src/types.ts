@@ -25,6 +25,8 @@ export type Account = {
   status: string;
   priority: number;
   nativeSource?: string | null;
+  // A usage reading taken on this Mac rather than a proxy account.
+  local?: boolean;
   creditModels?: string[];
   quota: Quota | null;
 };
@@ -89,16 +91,10 @@ export const providerInfo: Record<
     description: 'Google OAuth',
   },
   xai: {
-    name: 'Grok Build',
+    name: 'xAI',
     color: '#deded9',
     mark: '𝕏',
-    description: 'Grok CLI subscription',
-  },
-  kimi: {
-    name: 'Kimi',
-    color: '#dfdeda',
-    mark: 'K',
-    description: 'Kimi coding subscription',
+    description: 'Grok subscription · Grok Build and the Grok app',
   },
   cursor: {
     name: 'Cursor',
@@ -106,15 +102,12 @@ export const providerInfo: Record<
     mark: 'C',
     description: 'Cursor subscription',
   },
-  'grok-bot': {
-    name: 'Grok Bot',
-    color: '#deded9',
-    mark: '𝕏',
-    description: 'Grok Bot app subscription',
-  },
 };
 // Tracked on this Mac rather than through the proxy, so they have no OAuth flow.
-export const localSubscriptions = ['cursor', 'grok-bot'];
+export const localSubscriptions = ['cursor'];
+// The Grok app's usage reading joins the xAI provider as a local row. The id
+// matches the one earlier limit-display settings were saved under.
+export const grokAppId = 'grok-bot-subscription';
 export const info = (provider: string) =>
   providerInfo[provider] || {
     name: provider,
@@ -154,7 +147,6 @@ export function createDemo(): Account[] {
     ['codex', 'sam@studio.dev', 'Pro', 0, 0, 0, 67],
     ['codex', 'jules@build.dev', 'Plus', 5, 89, 5, 93],
     ['xai', 'alex@work.dev', 'SuperGrok', -1, -1, -1, 125],
-    ['kimi', 'robin@work.dev', 'Coding', 100, 100, 100, 117],
   ];
   return rows.map(([provider, email, plan, week, five, all, hours], index) => {
     const reset = new Date(Date.now() + hours * 3600000).toISOString();
