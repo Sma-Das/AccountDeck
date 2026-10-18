@@ -8,14 +8,14 @@ The GitHub backend includes the MIT-licensed routing library from [multi-github-
 
 ## GitHub workspace
 
-Install Python 3.9 or newer and GitHub CLI alongside Node.js. Sign in to each account with `gh auth login`, then open **GitHub accounts**. AccountDeck reads account metadata from the CLI; GitHub tokens stay in its credential store. **Add GitHub account** provides a sign-in command to run on the selected computer.
+Install Python 3.9 or newer and GitHub CLI alongside Node.js. Sign in to each account with `gh auth login`, then open **GitHub accounts**. AccountDeck reads account metadata from the CLI; GitHub tokens stay in its credential store. **Add account** provides a sign-in command to run on the selected computer.
 
-- **Folder routing** creates, edits, removes, searches, and filters routes. Existing folders and signed-in accounts are required. A checkout with remote-specific routes needs an explicit assignment for each remote.
+- **Folder routes** groups routes by folder and creates, edits, removes, searches, and filters them by account. Existing folders and signed-in accounts are required. A checkout with remote-specific routes needs an explicit assignment for each remote.
 - **Repositories** scans a workspace folder for up to 200 checkouts and shows remote assignments. Routes on a primary checkout also apply to its linked worktrees.
 - **Computers** reuses existing pairings and accepts complete GitHub router session URLs. The pairing fragment is stored only in the private machine registry. Each paired computer needs its existing `ghr` dashboard service running.
 - **Agent commands** generates `ghr exec` commands for Codex, Claude Code, Grok, OpenCode, and GitHub CLI. Install the `ghr` CLI on the computer where the command runs. `ghr setup` configures routing for ordinary HTTPS Git commands.
 
-The **GitHub computer** picker applies to GitHub accounts, routes, and scans. AI providers use the proxy configured on the AccountDeck host. An unreachable computer shows an error and never falls back to editing local routes. Pairing and unpairing do not change the other computer's accounts or services.
+The computer picker in each GitHub page header applies to GitHub accounts, routes, and scans. AI providers use the proxy configured on the AccountDeck host. An unreachable computer shows an error and never falls back to editing local routes. Pairing and unpairing do not change the other computer's accounts or services.
 
 GitHub controls have an independent HTTP-only workspace session and remain usable while the AI proxy is offline or disconnected. GitHub metadata requests use a fixed Python worker with bounded input and output; they cannot execute arbitrary CLI commands. `GHR_PYTHON` selects the interpreter and `GHR_CONFIG` overrides the shared route configuration. Tests use temporary configuration and fake accounts.
 
@@ -81,7 +81,7 @@ For a manual connection:
 
 1. Start an existing CLIProxyAPI instance that exposes the **v8 management API**.
 2. Select **Connect proxy** and enter its base URL, normally `http://localhost:8317`, and its management key.
-3. Select **Refresh all** to inspect the Claude, Codex, and Grok accounts on that proxy.
+3. Select **Refresh quotas** to inspect the Claude, Codex, and Grok accounts on that proxy.
 
 ### Reuse existing native sign-ins
 
@@ -104,39 +104,40 @@ The proxy’s management key and client API keys are different. The console uses
 
 ### Cursor subscription usage
 
-The Cursor card on Quota management and AI providers tracks a Cursor subscription independently of proxy routing. Select **Connect Cursor** and follow the dialog to paste your `WorkosCursorSessionToken` cookie from your signed-in Cursor dashboard. Personal and Enterprise accounts are supported. The console reads Cursor's dashboard usage summary, including available personal spending limits, Cursor Models and Other Models pools, on-demand usage, and pooled team spending. Missing limits stay unknown; only an explicit Cursor response marks access unlimited.
+The Cursor card on Quotas and AI providers tracks a Cursor subscription independently of proxy routing. Select **Connect Cursor** and follow the dialog to paste your `WorkosCursorSessionToken` cookie from your signed-in Cursor dashboard. Personal and Enterprise accounts are supported. The console reads Cursor's dashboard usage summary, including available personal spending limits, Cursor Models and Other Models pools, on-demand usage, and pooled team spending. Missing limits stay unknown; only an explicit Cursor response marks access unlimited.
 
-The server stores the session in `~/Library/Application Support/CLIProxy Console/cursor-connection.json` with owner-only file permissions, outside installed releases and git worktrees. The browser does not retain the token. Usage refreshes once a minute while the card is open, and its refresh button requests an immediate update. **Manage subscription** lets you reconnect an expired session or disconnect and delete the saved session. This uses Cursor's undocumented dashboard endpoint, which may change. It does not require a team admin API key or export the subscription into CLIProxyAPI.
+The server stores the session in `~/Library/Application Support/CLIProxy Console/cursor-connection.json` with owner-only file permissions, outside installed releases and git worktrees. The browser does not retain the token. Usage refreshes once a minute while the card is open, and its refresh button requests an immediate update. **Manage** lets you reconnect an expired session or disconnect and delete the saved session. This uses Cursor's undocumented dashboard endpoint, which may change. It does not require a team admin API key or export the subscription into CLIProxyAPI.
 
-### Grok Bot subscription usage
+### Grok app usage
 
-The Grok Bot card on Quota management and AI providers shows the weekly limit for a Grok Bot subscription. It is separate from the Grok Build accounts on the proxy, which use xAI OAuth through CLIProxyAPI. Install and sign in to the Grok Bot desktop app on the Mac that runs AccountDeck. No connection step is needed.
+One xAI subscription covers both Grok Build and the Grok app, so AccountDeck lists them together under the **xAI** provider. Grok Build accounts come from the proxy through xAI OAuth. The Grok app's weekly limit appears beside them as a **Grok app** row marked _This Mac_, and counts toward the xAI capacity summary. Install and sign in to the Grok Bot desktop app on the Mac that runs AccountDeck. No connection step is needed.
 
-AccountDeck reads the usage reading that Grok Bot saves in `~/Library/Application Support/Grok Bot/sand-client-persistence`. It reads only that cache. It never reads Grok Bot's encrypted credentials or the Keychain, and it sends no network requests. The reading is as current as Grok Bot's last refresh, and the card shows when it was saved. Open Grok Bot to update a stale reading. When a weekly reset passes after the last reading, the card marks the remaining quota unknown rather than showing last week's value. Set `GROK_BOT_DATA_DIR` to read another data directory, or `none` to turn the card off.
+AccountDeck reads the usage reading that Grok Bot saves in `~/Library/Application Support/Grok Bot/sand-client-persistence`. It reads only that cache. It never reads Grok Bot's encrypted credentials or the Keychain, and it sends no network requests. The reading is as current as Grok Bot's last refresh; the row warns when it is more than six hours old. Open Grok Bot to update a stale reading. When a weekly reset passes after the last reading, the row marks the remaining quota unknown rather than showing last week's value. Set `GROK_BOT_DATA_DIR` to read another data directory, or `none` to hide the row.
 
 ### Hide limits
 
-Select **Limit display** on Quota management to hide a provider's limits, such as Grok frontier access. **Manage account** can hide all limits for one account or selected model windows. Cursor's **Manage subscription** offers the same controls for its model and spending pools. Grok Bot appears in **Limit display** beside the proxy providers. Settings persist in the current browser and are scoped to the connected proxy. Hidden windows are omitted from capacity summaries, reset ordering, and the next-reset display. Hiding limits changes the display; proxy routing and automatic priority continue to use real provider data.
+Select **Limit display** on Quotas to hide a provider's limits, such as Grok frontier access. **Manage account** can hide all limits for one account or selected model windows. Cursor's **Manage** dialog offers the same controls for its model and spending pools. Hiding xAI limits also hides the Grok app row, and the row's own dialog can hide it alone. Settings persist in the current browser and are scoped to the connected proxy. Hidden windows are omitted from capacity summaries, reset ordering, and the next-reset display. Hiding limits changes the display; proxy routing and automatic priority continue to use real provider data.
 
 For remote proxy connections, enable remote management in CLIProxyAPI. See the [v8 management API documentation](https://help.router-for.me/management/apiv8) for authentication and configuration. Earlier releases that only expose `/v0/management` are not supported.
 
 ## What works
 
-- **Quota management:** per-account remaining percentages, reset countdowns, aggregate provider summaries, search, provider filters, ledger and card layouts, and sorting by reset time, remaining quota, or priority. Stale values and failed refreshes are labeled.
-- **Provider management:** start, poll, and cancel OAuth login for Claude, Codex, Antigravity, xAI (shown as Grok Build), and Kimi. Forward a matching callback URL when signing in from another machine.
+- **Quotas:** per-account remaining percentages, reset countdowns, provider summaries that double as filters, search, provider filters, ledger and card layouts, and sorting by reset time, remaining quota, or priority. Stale values and failed refreshes are labeled.
+- **Provider management:** start, poll, and cancel OAuth login for Claude, Codex, Antigravity, and xAI (Grok Build). Forward a matching callback URL when signing in from another machine.
 - **Account controls:** pause or resume accounts and edit routing priority through the management API.
 - **Routing:** configure round robin, fill first, or existing weighted round robin; enable session affinity.
-- **Expiring quota:** enable **Auto-prioritize · 15m** on the quota page to prefer unused Claude, Codex, and Grok quota before reset.
+- **Expiring quota:** enable **Auto-prioritize** on the Quotas page to prefer unused Claude, Codex, and Grok quota before reset.
 - **Client setup:** discover account models and copy configuration for Claude Code, Codex, or an OpenAI-compatible cURL request. Client configuration files are not edited automatically.
-- **Overview:** inspect the proxy’s account readiness, next weekly reset, and client endpoint.
+- **Overview:** inspect account readiness, the next reset, accounts that need attention, GitHub route counts, and the client endpoint.
+- **Command menu:** press ⌘K (Ctrl+K elsewhere) to jump to any page or run common actions. Press `/` to focus search on Quotas and Folder routes.
 
-Percentages always mean **remaining quota**. Provider totals add account percentages and treat each account equally; they are not token estimates or plan-weighted capacity. For example, 409% of 500% means five accounts have a combined 409 percentage points remaining.
+Percentages always mean **remaining quota**. Provider summaries average the remaining percentage of visible accounts and treat each account equally; they are not token estimates or plan-weighted capacity. For example, 82% across five accounts means they have a combined 409 of 500 percentage points remaining.
 
 “Soonest reset” changes the ledger’s order. Higher account priorities affect new sessions, while established session bindings take precedence when affinity is enabled.
 
 ## Auto-prioritize expiring quota
 
-Turn on **Auto-prioritize · 15m** on the quota page. The server checks live Claude, Codex, and Grok quotas every minute, including while the browser is closed. An account with remaining quota and a reset within 15 minutes gets a temporary priority above the other accounts for that provider. When several accounts are due, the earliest reset gets the highest priority. This sends your normal requests to those accounts; it does not generate requests or change the requested model.
+Turn on **Auto-prioritize** on the Quotas page. The server checks live Claude, Codex, and Grok quotas every minute, including while the browser is closed. An account with remaining quota and a reset within 15 minutes gets a temporary priority above the other accounts for that provider. When several accounts are due, the earliest reset gets the highest priority. This sends your normal requests to those accounts; it does not generate requests or change the requested model.
 
 The console restores the saved priority after reset, depletion, pausing, a quota-check failure, or disabling the feature. Changing a boosted account's priority in the console changes the priority that will be restored. External priority edits take precedence for the current window. Existing affinity bindings stay bound to their accounts.
 

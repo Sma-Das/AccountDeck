@@ -79,15 +79,15 @@ export function ConnectionModal({
               onClick={disconnect}
               disabled={busy}
             >
-              <Unplug size={14} />
+              <Unplug size={16} />
               Disconnect
             </button>
           )}
           <button className="primary" disabled={busy}>
             {busy ? (
-              <Loader2 size={15} className="spin" />
+              <Loader2 size={17} className="spin" />
             ) : (
-              <Link2 size={15} />
+              <Link2 size={17} />
             )}
             {busy ? 'Connecting…' : 'Connect proxy'}
           </button>
@@ -100,7 +100,7 @@ export function ConnectionModal({
         rel="noreferrer"
       >
         Where do I find my management key?
-        <ArrowUpRight size={12} />
+        <ArrowUpRight size={14} />
       </a>
     </Modal>
   );

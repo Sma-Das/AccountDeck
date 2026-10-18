@@ -47,9 +47,15 @@ export function AccountModal({
     }
   }
   return (
-    <Modal title="Manage account" close={close}>
+    <Modal
+      title={account.local ? 'Grok app usage' : 'Manage account'}
+      close={close}
+    >
       <div className="modal-account">
-        <Brand provider={account.provider} />
+        <Brand
+          provider={account.provider}
+          icon={account.local ? 'grok' : undefined}
+        />
         <div>
           <strong>
             {reveal
@@ -63,22 +69,31 @@ export function AccountModal({
         </div>
       </div>
       <CreditAccessNote account={account} />
-      <label>
-        Routing priority
-        <input
-          type="number"
-          min="-100"
-          max="100"
-          step="1"
-          value={priority}
-          onChange={(event) => setPriority(Number(event.target.value))}
-        />
-      </label>
-      <p className="field-help">
-        {originalPriority !== undefined
-          ? `Auto-prioritized at P${account.priority}. This priority resumes after the boost.`
-          : 'Higher priorities receive new sessions first. Affinity keeps existing sessions bound.'}
-      </p>
+      {account.local ? (
+        <p className="field-help">
+          Read from the Grok app on this Mac. It shares the xAI subscription
+          with Grok Build; open the app to refresh its usage.
+        </p>
+      ) : (
+        <>
+          <label>
+            Routing priority
+            <input
+              type="number"
+              min="-100"
+              max="100"
+              step="1"
+              value={priority}
+              onChange={(event) => setPriority(Number(event.target.value))}
+            />
+          </label>
+          <p className="field-help">
+            {originalPriority !== undefined
+              ? `Auto-prioritized at P${account.priority}. This priority resumes after the boost.`
+              : 'Higher priorities receive new sessions first. Affinity keeps existing sessions bound.'}
+          </p>
+        </>
+      )}
       <fieldset className="limit-options">
         <legend>Limit display</legend>
         <p className="field-help">
@@ -124,28 +139,30 @@ export function AccountModal({
           {error}
         </p>
       )}
-      <div className="modal-actions">
-        <button
-          className="secondary"
-          disabled={busy}
-          onClick={() => save({ disabled: !account.disabled })}
-        >
-          {account.disabled ? <Play size={14} /> : <Pause size={14} />}
-          {account.disabled ? 'Resume account' : 'Pause account'}
-        </button>
-        <button
-          className="primary"
-          disabled={
-            busy ||
-            !Number.isInteger(priority) ||
-            priority < -100 ||
-            priority > 100
-          }
-          onClick={() => save({ priority })}
-        >
-          Save priority
-        </button>
-      </div>
+      {!account.local && (
+        <div className="modal-actions">
+          <button
+            className="secondary"
+            disabled={busy}
+            onClick={() => save({ disabled: !account.disabled })}
+          >
+            {account.disabled ? <Play size={16} /> : <Pause size={16} />}
+            {account.disabled ? 'Resume account' : 'Pause account'}
+          </button>
+          <button
+            className="primary"
+            disabled={
+              busy ||
+              !Number.isInteger(priority) ||
+              priority < -100 ||
+              priority > 100
+            }
+            onClick={() => save({ priority })}
+          >
+            Save priority
+          </button>
+        </div>
+      )}
     </Modal>
   );
 }

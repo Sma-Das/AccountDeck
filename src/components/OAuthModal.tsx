@@ -119,11 +119,11 @@ export function OAuthModal({
       </label>
       {!connected ? (
         <div className="connect-first">
-          <Network size={28} />
+          <Network size={32} />
           <h3>Connect your proxy first</h3>
           <button className="primary" onClick={connect}>
             Connect proxy
-            <ArrowRight size={14} />
+            <ArrowRight size={16} />
           </button>
         </div>
       ) : login ? (
@@ -143,10 +143,10 @@ export function OAuthModal({
               rel="noreferrer"
             >
               Continue with {info(provider).name}
-              <ExternalLink size={14} />
+              <ExternalLink size={16} />
             </a>
             <span>
-              <Loader2 size={13} className="spin" />
+              <Loader2 size={15} className="spin" />
               Waiting for sign-in…
             </span>
           </div>
@@ -192,9 +192,9 @@ export function OAuthModal({
           <div className="modal-actions">
             <button className="primary" onClick={start} disabled={busy}>
               {busy ? (
-                <Loader2 size={15} className="spin" />
+                <Loader2 size={17} className="spin" />
               ) : (
-                <ArrowUpRight size={15} />
+                <ArrowUpRight size={17} />
               )}
               Start {info(provider).name} login
             </button>
