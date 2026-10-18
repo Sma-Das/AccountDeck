@@ -3,7 +3,7 @@ import { ArrowUpRight, EyeOff, RefreshCw } from 'lucide-react';
 import { api, errorMessage, relative } from '../types';
 import type { Window } from '../types';
 import type { LimitDisplay } from '../limit-display';
-import { Bar, Meter, Modal, tone } from './ui';
+import { Bar, Brand, Meter, Modal, tone } from './ui';
 
 type Usage = {
   connected: boolean;
@@ -93,9 +93,7 @@ export function CursorUsage({
     if (!usage.connected) return null;
     return (
       <div className="sub-row">
-        <span className="provider-mark small cursor" aria-hidden="true">
-          C
-        </span>
+        <Brand provider="cursor" small />
         <span className="sub-name">
           <strong>Cursor</strong>
           <small>{usage.plan || 'Subscription'}</small>
@@ -140,9 +138,7 @@ export function CursorUsage({
   return (
     <section className="card subscription">
       <div className="subscription-heading">
-        <span className="provider-mark small cursor" aria-hidden="true">
-          C
-        </span>
+        <Brand provider="cursor" small />
         <h2>Cursor</h2>
         <span className="badge">{usage.plan || 'Subscription'}</span>
         {usage.connected && (

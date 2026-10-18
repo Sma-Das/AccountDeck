@@ -10,75 +10,75 @@
   font-synthesis: none;
   -webkit-font-smoothing: antialiased;
   --mono: 'Geist Mono', 'SFMono-Regular', Consolas, monospace;
-  --bg: #0b0b0d;
-  --sidebar: #0e0e11;
-  --panel: #131316;
-  --raised: #1a1a1e;
-  --hover: #1c1c21;
-  --inset: #0f0f12;
-  --text: #ececef;
-  --subtle: #a3a3ad;
-  --muted: #84848e;
-  --line: #222227;
-  --line-strong: #303037;
-  --primary: #ececef;
-  --primary-text: #131316;
-  --accent: #b3a4ff;
-  --accent-bg: #b3a4ff1c;
-  --accent-line: #b3a4ff59;
-  --green: #5fd3a3;
-  --green-bg: #5fd3a317;
-  --yellow: #e6b96a;
-  --yellow-bg: #e6b96a17;
-  --red: #f39a9a;
-  --red-bg: #f39a9a17;
-  --claude: #d9957a;
-  --codex: #a6b9ef;
-  --hue-0: #7cc4fa;
-  --hue-1: #c4a5fa;
-  --hue-2: #6fdcb0;
-  --hue-3: #f6bd78;
-  --hue-4: #f4a3cc;
-  --hue-5: #8ddfe3;
-  --shadow: 0 1px 0 #ffffff05 inset, 0 1px 2px #0006;
-  --overlay-shadow: 0 28px 92px #000a, 0 0 0 1px #ffffff0a;
-  --radius: 14px;
-  --radius-sm: 9px;
+  --bg: #000000;
+  --sidebar: #000000;
+  --panel: #0a0a0a;
+  --raised: #1a1a1a;
+  --hover: #141414;
+  --inset: #000000;
+  --text: #ededed;
+  --subtle: #a1a1a1;
+  --muted: #8f8f8f;
+  --line: #242424;
+  --line-strong: #333333;
+  --primary: #ededed;
+  --primary-text: #0a0a0a;
+  --accent: #52a8ff;
+  --accent-bg: #0070f324;
+  --accent-line: #0070f380;
+  --green: #62c073;
+  --green-bg: #62c0731a;
+  --yellow: #ffb224;
+  --yellow-bg: #ffb2241a;
+  --red: #ff6166;
+  --red-bg: #ff61661a;
+  --claude: #d97757;
+  --codex: #ededed;
+  --hue-0: #52a8ff;
+  --hue-1: #bf7af0;
+  --hue-2: #0ac7b4;
+  --hue-3: #f2a93b;
+  --hue-4: #f75f8f;
+  --hue-5: #9b9bff;
+  --shadow: none;
+  --overlay-shadow: 0 0 0 1px #ffffff1a, 0 16px 70px #000000d9;
+  --radius: 8px;
+  --radius-sm: 6px;
 }
 :root[data-theme='light'] {
   color-scheme: light;
-  --bg: #f6f6f7;
-  --sidebar: #fbfbfc;
-  --panel: #fff;
-  --raised: #f2f2f4;
-  --hover: #f4f4f6;
-  --inset: #f8f8f9;
-  --text: #18181b;
-  --subtle: #52525b;
-  --muted: #6b6b75;
-  --line: #e6e6ea;
-  --line-strong: #d5d5db;
-  --primary: #18181b;
-  --primary-text: #fff;
-  --accent: #6a4bd6;
-  --accent-bg: #6a4bd612;
-  --accent-line: #6a4bd64d;
-  --green: #12804f;
-  --green-bg: #12804f12;
-  --yellow: #8c6110;
-  --yellow-bg: #c4870f17;
-  --red: #b42f2f;
-  --red-bg: #b42f2f10;
-  --claude: #aa5336;
-  --codex: #4a67b0;
-  --hue-0: #1f6db5;
-  --hue-1: #6a4bd6;
-  --hue-2: #0e7a55;
-  --hue-3: #9a5a0b;
-  --hue-4: #b2346f;
-  --hue-5: #127780;
-  --shadow: 0 1px 2px #18181b0d;
-  --overlay-shadow: 0 28px 92px #18181b2e, 0 0 0 1px #18181b14;
+  --bg: #fafafa;
+  --sidebar: #fafafa;
+  --panel: #ffffff;
+  --raised: #f2f2f2;
+  --hover: #f7f7f7;
+  --inset: #ffffff;
+  --text: #171717;
+  --subtle: #5e5e5e;
+  --muted: #737373;
+  --line: #eaeaea;
+  --line-strong: #d9d9d9;
+  --primary: #171717;
+  --primary-text: #ffffff;
+  --accent: #0068d6;
+  --accent-bg: #0070f314;
+  --accent-line: #0070f359;
+  --green: #1a7f37;
+  --green-bg: #1a7f3712;
+  --yellow: #a35200;
+  --yellow-bg: #ffb22426;
+  --red: #cb2a2f;
+  --red-bg: #cb2a2f10;
+  --claude: #c15f3c;
+  --codex: #171717;
+  --hue-0: #0068d6;
+  --hue-1: #8e4ec6;
+  --hue-2: #00857a;
+  --hue-3: #a35200;
+  --hue-4: #c41562;
+  --hue-5: #4f4fd8;
+  --shadow: 0 1px 2px #0000000a;
+  --overlay-shadow: 0 0 0 1px #00000014, 0 16px 70px #00000026;
 }
 
 /* ---------- Base ---------- */
@@ -291,9 +291,9 @@ svg {
   box-shadow: var(--shadow);
 }
 .icon-button.bordered[aria-pressed='true'] {
-  color: var(--accent);
-  border-color: var(--accent-line);
-  background: var(--accent-bg);
+  color: var(--text);
+  border-color: var(--muted);
+  background: var(--raised);
 }
 .icon-button.danger-hover:hover:not(:disabled) {
   color: var(--red);
@@ -355,7 +355,7 @@ svg {
   stroke-width: 1.5;
 }
 .logo .logo-front {
-  fill: var(--accent);
+  fill: var(--text);
 }
 .sidebar {
   width: 267px;
@@ -420,7 +420,7 @@ svg {
   padding: 0 12px;
   color: var(--subtle);
   font-size: 15px;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
 }
 .sidebar nav button:hover {
   color: var(--text);
@@ -432,7 +432,7 @@ svg {
   font-weight: 500;
 }
 .sidebar nav button.active svg {
-  color: var(--accent);
+  color: var(--text);
 }
 .sidebar nav button span {
   flex: 1;
@@ -446,7 +446,7 @@ svg {
 .sidebar nav button small.nav-alert {
   color: var(--yellow);
   background: var(--yellow-bg);
-  border-radius: 12px;
+  border-radius: 999px;
   padding: 0 7px;
   font-weight: 500;
 }
@@ -461,7 +461,7 @@ svg {
   padding: 13px 14px;
   border-color: var(--line);
   background: var(--panel);
-  border-radius: 12px;
+  border-radius: var(--radius);
 }
 .proxy-card:hover {
   border-color: var(--line-strong);
@@ -674,8 +674,8 @@ main:focus {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  padding: 1px 8px;
-  border-radius: 7px;
+  padding: 1px 9px;
+  border-radius: 999px;
   background: var(--raised);
   color: var(--subtle);
   font-size: 12.5px;
@@ -782,7 +782,7 @@ main:focus {
 }
 .skeleton span {
   height: 16px;
-  border-radius: 7px;
+  border-radius: var(--radius-sm);
   background: linear-gradient(
     90deg,
     var(--raised) 0%,
@@ -865,7 +865,7 @@ main:focus {
 .segmented button {
   width: 34px;
   height: 32px;
-  border-radius: 7px;
+  border-radius: var(--radius-sm);
   color: var(--muted);
 }
 .segmented button:hover {
@@ -900,16 +900,20 @@ main:focus {
   font-variant-numeric: tabular-nums;
 }
 .chip[aria-pressed='true'] {
-  color: var(--text);
-  border-color: var(--accent-line);
-  background: var(--accent-bg);
+  color: var(--primary-text);
+  border-color: var(--primary);
+  background: var(--primary);
+}
+.chip[aria-pressed='true'] > span {
+  color: inherit;
+  opacity: 0.7;
 }
 .switch {
   width: 39px;
   height: 23px;
   background: var(--line-strong);
   padding: 2px;
-  border-radius: 23px;
+  border-radius: 999px;
   justify-content: flex-start;
   flex-shrink: 0;
 }
@@ -966,14 +970,14 @@ main:focus {
 .track {
   height: 7px;
   background: var(--line);
-  border-radius: 7px;
+  border-radius: var(--radius-sm);
   overflow: hidden;
   width: 100%;
 }
 .track > span {
   display: block;
   height: 100%;
-  border-radius: 7px;
+  border-radius: var(--radius-sm);
   min-width: 0;
   transition: width 0.4s ease;
 }
@@ -1119,7 +1123,7 @@ main:focus {
   column-gap: 23px;
   row-gap: 7px;
   padding: 14px 9px;
-  border-radius: 12px;
+  border-radius: var(--radius);
 }
 .capacity-list .capacity:hover {
   background: var(--hover);
@@ -1254,7 +1258,7 @@ main:focus {
   gap: 12px;
   padding: 9px;
   text-align: left;
-  border-radius: 9px;
+  border-radius: var(--radius-sm);
 }
 .attention-list button:hover {
   background: var(--hover);
@@ -1286,7 +1290,7 @@ main:focus {
   align-items: center;
   gap: 12px;
   padding: 16px;
-  border-radius: 12px;
+  border-radius: var(--radius);
   background: var(--green-bg);
   color: var(--green);
   font-size: 14.5px;
@@ -1330,9 +1334,8 @@ main:focus {
   border-color: var(--line-strong);
 }
 .capacity-grid .capacity.selected {
-  border-color: var(--accent-line);
-  background: var(--accent-bg);
-  box-shadow: 0 0 0 1px var(--accent-line);
+  border-color: var(--text);
+  box-shadow: 0 0 0 1px var(--text);
 }
 .capacity-grid .capacity-head small {
   margin-left: auto;
@@ -1485,7 +1488,7 @@ main:focus {
 .account-cards .account-row {
   grid-template-columns: minmax(0, 1fr) auto;
   border: 1px solid var(--line);
-  border-radius: 12px;
+  border-radius: var(--radius);
   padding: 18px;
   gap: 18px;
   background: var(--panel);
@@ -1548,54 +1551,28 @@ main:focus {
 
 /* ---------- Providers ---------- */
 .provider-mark {
-  font-size: 30px;
   width: 39px;
   height: 39px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--raised);
+  color: var(--text);
+  font-size: 15px;
+  font-weight: 600;
   line-height: 1;
-  font-family: Arial, sans-serif;
-  color: var(--subtle);
 }
 .provider-mark.small {
-  font-size: 19.5px;
-  width: 23px;
-  height: 23px;
+  width: 18px;
+  height: 18px;
+  border: 0;
+  background: none;
 }
 .provider-mark.claude {
   color: var(--claude);
-}
-.provider-mark.codex,
-.provider-mark.antigravity {
-  color: var(--codex);
-}
-.provider-mark.antigravity {
-  font-weight: 800;
-}
-.provider-mark.xai,
-.provider-mark.grok-bot {
-  color: var(--text);
-}
-.provider-mark.kimi,
-.provider-mark.cursor {
-  border: 1px solid var(--line-strong);
-  border-radius: 7px;
-  color: var(--text);
-  width: 32px;
-  height: 32px;
-  font-size: 19.5px;
-  font-weight: 700;
-  background: var(--raised);
-}
-.provider-mark.kimi.small,
-.provider-mark.cursor.small {
-  width: 21px;
-  height: 21px;
-  font-size: 12.5px;
-  border-radius: 5px;
-  margin: 0 1px;
 }
 .provider-grid {
   display: grid;
@@ -1636,7 +1613,7 @@ main:focus {
   width: calc(100% + 18px);
   font-size: 14px;
   text-align: left;
-  border-radius: 9px;
+  border-radius: var(--radius-sm);
 }
 .provider-accounts button:hover {
   background: var(--hover);
@@ -1689,7 +1666,7 @@ main:focus {
 }
 .strategy-option {
   border: 1px solid var(--line);
-  border-radius: 12px;
+  border-radius: var(--radius);
   display: flex;
   gap: 14px;
   align-items: center;
@@ -1756,7 +1733,7 @@ main:focus {
   font-family: var(--mono);
   font-size: 14px;
   text-align: left;
-  border-radius: 9px;
+  border-radius: var(--radius-sm);
 }
 .priority-list button:hover {
   background: var(--hover);
@@ -1782,7 +1759,7 @@ main:focus {
   gap: 2px;
   padding: 3px;
   border: 1px solid var(--line-strong);
-  border-radius: 12px;
+  border-radius: var(--radius);
   background: var(--inset);
   margin: 0 0 18px;
 }
@@ -1791,7 +1768,7 @@ main:focus {
   height: 34px;
   padding: 0 14px;
   color: var(--subtle);
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
 }
 .client-tabs button:hover {
   color: var(--text);
@@ -1835,7 +1812,7 @@ main:focus {
 }
 .code-block {
   border: 1px solid var(--line);
-  border-radius: 12px;
+  border-radius: var(--radius);
   background: var(--inset);
   overflow: hidden;
   margin: 5px 0 16px;
@@ -1907,8 +1884,8 @@ main:focus {
   gap: 7px;
   font-size: 14px;
   font-weight: 500;
-  padding: 1px 9px 1px 8px;
-  border-radius: 7px;
+  padding: 1px 10px 1px 9px;
+  border-radius: 999px;
   color: var(--hue);
   background: color-mix(in srgb, var(--hue) 12%, transparent);
   white-space: nowrap;
@@ -2039,7 +2016,7 @@ main:focus {
   gap: 14px;
   min-height: 39px;
   padding: 0 0 0 12px;
-  border-radius: 9px;
+  border-radius: var(--radius-sm);
 }
 .route-group li:hover {
   background: var(--hover);
@@ -2198,7 +2175,7 @@ main:focus {
 .machine-icon {
   width: 39px;
   height: 39px;
-  border-radius: 10px;
+  border-radius: var(--radius);
   display: grid;
   place-items: center;
   background: var(--raised);
@@ -2237,7 +2214,7 @@ main:focus {
   padding: 12px 7px 12px 16px;
   border: 1px solid var(--line);
   background: var(--inset);
-  border-radius: 12px;
+  border-radius: var(--radius);
 }
 .command code {
   flex: 1;
@@ -2289,7 +2266,7 @@ main:focus {
   border: 1px solid var(--line);
   background: var(--inset);
   padding: 14px 16px;
-  border-radius: 12px;
+  border-radius: var(--radius);
 }
 .github-command code {
   display: block;
@@ -2312,7 +2289,7 @@ main:focus {
   background: var(--panel);
   border: 1px solid var(--line-strong);
   box-shadow: var(--overlay-shadow);
-  border-radius: 12px;
+  border-radius: var(--radius);
   padding: 12px 12px 12px 16px;
   font-size: 14.5px;
   max-width: min(529px, calc(100vw - 46px));
@@ -2339,7 +2316,7 @@ main:focus {
 dialog {
   padding: 0;
   border: 1px solid var(--line-strong);
-  border-radius: 16px;
+  border-radius: 12px;
   background: var(--panel);
   color: var(--text);
   max-width: 552px;
@@ -2406,7 +2383,7 @@ dialog::backdrop {
   align-items: center;
   padding: 14px;
   margin: 9px 0 23px;
-  border-radius: 12px;
+  border-radius: var(--radius);
   background: var(--inset);
   border: 1px solid var(--line);
   min-width: 0;
@@ -2560,7 +2537,7 @@ details label {
   padding: 0 12px;
   font-size: 15px;
   color: var(--subtle);
-  border-radius: 9px;
+  border-radius: var(--radius-sm);
 }
 .palette-results button span {
   flex: 1;

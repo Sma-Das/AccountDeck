@@ -41,8 +41,9 @@ import {
   providerInfo,
   relative,
   errorMessage as message,
+  grokAppId,
 } from './types';
-import type { Account, Expiry, Page, Quota, Routing } from './types';
+import type { Account, Expiry, Page, Quota, Routing, Window } from './types';
 import { Bar, Brand, Logo, Meter, PageHeader, tone } from './components/ui';
 import { ConnectionModal } from './components/ConnectionModal';
 import { AccountModal } from './components/AccountModal';
@@ -52,7 +53,6 @@ import { SetupPage } from './components/SetupPage';
 import { GitHubWorkspace } from './components/GitHubWorkspace';
 import type { GitHubSummary } from './components/GitHubWorkspace';
 import { CursorUsage } from './components/CursorUsage';
-import { GrokBotUsage } from './components/GrokBotUsage';
 import { CreditAccessNote } from './components/CreditAccessNote';
 import { LimitDisplayModal } from './components/LimitDisplayModal';
 import { CommandPalette } from './components/CommandPalette';
@@ -156,6 +156,13 @@ const navGroups: { label: string | null; items: Page[] }[] = [
 const isPage = (id: string): id is Page => Object.hasOwn(pages, id);
 // Only these providers report quota through the proxy.
 const inspectable = ['claude', 'codex', 'xai'];
+type GrokApp = {
+  connected: boolean;
+  plan: string | null;
+  windows: Window[];
+  updatedAt?: string | null;
+  error: string | null;
+};
 const emptyExpiry: Expiry = {
   enabled: false,
   checkedAt: null,
@@ -173,6 +180,32 @@ export default function App() {
   });
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [initializing, setInitializing] = useState(true);
+  // The Grok app's own usage reading, shown as part of the xAI provider.
+  const [grokApp, setGrokApp] = useState<GrokApp | null>(null);
+  const [grokBusy, setGrokBusy] = useState(false);
+  const loadGrokApp = useCallback(async () => {
+    setGrokBusy(true);
+    try {
+      setGrokApp(await api<GrokApp>('/grok-bot'));
+    } catch (error) {
+      setGrokApp((current) => ({
+        connected: true,
+        plan: current?.plan || null,
+        windows: current?.windows || [],
+        updatedAt: current?.updatedAt,
+        error: message(error),
+      }));
+    } finally {
+      setGrokBusy(false);
+    }
+  }, []);
+  useEffect(() => {
+    // The endpoint needs the workspace session that startup creates.
+    if (initializing) return;
+    void loadGrokApp();
+    const timer = setInterval(() => void loadGrokApp(), 60000);
+    return () => clearInterval(timer);
+  }, [initializing, loadGrokApp]);
   const [startupError, setStartupError] = useState('');
   const [connected, setConnected] = useState(false);
   const [baseUrl, setBaseUrl] = useState('http://localhost:8317');
@@ -447,6 +480,7 @@ export default function App() {
   async function refreshAll() {
     const version = generation.current;
     setBusy(true);
+    void loadGrokApp();
     try {
       const data = connected ? await loadSnapshot() : { accounts };
       if (!data || version !== generation.current) return;
@@ -517,7 +551,32 @@ export default function App() {
       ...accounts.map((a) => a.provider),
     ]),
   ];
-  const visible = accounts
+  const grokRow: Account | null =
+    grokApp && (grokApp.connected || grokApp.error)
+      ? {
+          id: grokAppId,
+          name: 'Grok app',
+          email: null,
+          provider: 'xai',
+          label: null,
+          plan: grokApp.plan,
+          disabled: false,
+          unavailable: false,
+          runtimeOnly: false,
+          status: 'ready',
+          priority: 0,
+          local: true,
+          quota: {
+            windows: grokApp.windows,
+            plan: grokApp.plan,
+            updatedAt: grokApp.updatedAt || '',
+            error: grokApp.error,
+          },
+        }
+      : null;
+  // Proxy accounts plus local readings that belong to the same subscriptions.
+  const pool = grokRow ? [...accounts, grokRow] : accounts;
+  const visible = pool
     .filter(
       (a) =>
         (filter === 'all' || a.provider === filter) &&
@@ -540,10 +599,10 @@ export default function App() {
     (a) => a.unavailable && !a.disabled,
   ).length;
   const paused = accounts.filter((a) => a.disabled).length;
-  const loaded = accounts.filter(
+  const loaded = pool.filter(
     (a) => visibleWindows(a, limitDisplay).length,
   ).length;
-  const nextReset = accounts
+  const nextReset = pool
     .filter((a) => !a.disabled && Date.parse(weekly(a)?.resetsAt || '') > now)
     .sort(
       (a, b) =>
@@ -552,21 +611,19 @@ export default function App() {
   const activeProviders = providers.filter(
     (provider) =>
       !localSubscriptions.includes(provider) &&
-      accounts.some((account) => account.provider === provider),
+      pool.some((account) => account.provider === provider),
   );
   const isGitHub = page.startsWith('github-');
   const isAI = !isGitHub && page !== 'overview';
   const minutesAgo = Math.max(0, Math.floor((now - refreshed) / 60000));
   const syncLabel = `${connected ? 'Refreshed' : 'Demo data'} ${minutesAgo < 1 ? 'just now' : `${minutesAgo}m ago`}`;
   const label = (account: Account) =>
-    reveal
+    account.local || reveal
       ? account.email || account.name
       : masked(account.email || account.name);
 
   function capacity(provider: string) {
-    const group = accounts.filter(
-      (a) => a.provider === provider && !a.disabled,
-    );
+    const group = pool.filter((a) => a.provider === provider && !a.disabled);
     const shown = group.filter(
       (account) =>
         !limitsHidden(account, limitDisplay) &&
@@ -606,6 +663,7 @@ export default function App() {
   function capacityCard(provider: string, onSelect: () => void) {
     const c = capacity(provider);
     const total = accounts.filter((a) => a.provider === provider).length;
+    const local = pool.some((a) => a.local && a.provider === provider);
     const selected = page === 'quota' && filter === provider;
     return (
       <button
@@ -619,6 +677,7 @@ export default function App() {
           <strong>{info(provider).name}</strong>
           <small>
             {total} {total === 1 ? 'account' : 'accounts'}
+            {local && ' + app'}
           </small>
         </span>
         <span className="capacity-value">
@@ -653,7 +712,7 @@ export default function App() {
     );
   }
 
-  const attention = accounts
+  const attention = pool
     .flatMap((account) => {
       if (account.disabled) return [];
       const window = weekly(account);
@@ -760,10 +819,14 @@ export default function App() {
     const hidden =
       limitsHidden(account, limitDisplay) ||
       (!!account.quota?.windows.length && !accountWindows.length);
+    // The Grok app saves its reading occasionally, so allow it more slack.
     const stale =
       !!account.quota?.updatedAt &&
-      now - Date.parse(account.quota.updatedAt) > 5 * 60000;
-    const refreshable = !connected || inspectable.includes(account.provider);
+      now - Date.parse(account.quota.updatedAt) >
+        (account.local ? 6 * 3600000 : 5 * 60000);
+    const refreshable =
+      account.local || !connected || inspectable.includes(account.provider);
+    const loading = account.local ? grokBusy : loadingIds.has(account.id);
     return (
       <article
         className={`account-row ${account.disabled ? 'disabled' : ''}`}
@@ -784,8 +847,11 @@ export default function App() {
                 <span>{info(account.provider).name} ·</span>
               )}
               <span>
-                {account.quota?.plan || account.plan || 'OAuth account'}
+                {account.quota?.plan ||
+                  account.plan ||
+                  (account.local ? 'Subscription' : 'OAuth account')}
               </span>
+              {account.local && <span className="tag">This Mac</span>}
               {account.nativeSource && (
                 <span className="tag">{account.nativeSource}</span>
               )}
@@ -820,12 +886,14 @@ export default function App() {
           <button
             className="icon-button"
             disabled={
-              loadingIds.has(account.id) ||
+              loading ||
               account.disabled ||
-              busy ||
+              (busy && !account.local) ||
               !refreshable
             }
-            onClick={() => refreshAccount(account)}
+            onClick={() =>
+              account.local ? void loadGrokApp() : refreshAccount(account)
+            }
             aria-label={`Refresh ${info(account.provider).name} account ${label(account)}`}
             title={
               refreshable
@@ -833,10 +901,7 @@ export default function App() {
                 : 'Quota inspection is not supported for this provider'
             }
           >
-            <RefreshCw
-              size={17}
-              className={loadingIds.has(account.id) ? 'spin' : ''}
-            />
+            <RefreshCw size={17} className={loading ? 'spin' : ''} />
           </button>
           <button
             className="icon-button"
@@ -853,7 +918,9 @@ export default function App() {
             <div className="row-warning">
               <Clock3 size={14} />
               {account.quota?.error ||
-                'Quota is over 5 minutes old. Refresh for current limits.'}
+                (account.local
+                  ? 'This reading is over 6 hours old. Open the Grok app to update it.'
+                  : 'Quota is over 5 minutes old. Refresh for current limits.')}
             </div>
           )}
       </article>
@@ -1196,7 +1263,7 @@ export default function App() {
                     <div>
                       <h2 id="capacity-title">AI capacity</h2>
                       <p>
-                        {loaded} of {accounts.length} accounts reporting ·{' '}
+                        {loaded} of {pool.length} sources reporting ·{' '}
                         {syncLabel}
                       </p>
                     </div>
@@ -1229,7 +1296,6 @@ export default function App() {
                     </div>
                   )}
                   <div className="local-subscriptions">
-                    <GrokBotUsage summary display={limitDisplay} />
                     <CursorUsage
                       summary
                       active={connected}
@@ -1361,7 +1427,7 @@ export default function App() {
                     </h2>
                     <p id="expiry-help">
                       {connected
-                        ? 'Auto-prioritize prefers unused Claude, Codex, and Grok Build quota in its last 15 minutes.'
+                        ? 'Auto-prioritize prefers unused Claude, Codex, and xAI quota in its last 15 minutes.'
                         : 'Connect your proxy to auto-prioritize expiring quota.'}
                       {expiry.boosted.length > 0 &&
                         ` ${expiry.boosted.length} prioritized now.`}
@@ -1528,7 +1594,6 @@ export default function App() {
                 </div>
               </section>
               <div className="subscription-grid">
-                <GrokBotUsage display={limitDisplay} />
                 <CursorUsage
                   active={connected}
                   display={limitDisplay}
@@ -1541,7 +1606,7 @@ export default function App() {
             <>
               <div className="provider-grid">
                 {activeProviders.map((provider) => {
-                  const group = accounts.filter((a) => a.provider === provider);
+                  const group = pool.filter((a) => a.provider === provider);
                   return (
                     <section className="card provider-panel" key={provider}>
                       <div className="provider-panel-heading">
@@ -1625,9 +1690,8 @@ export default function App() {
                   </div>
                 </section>
               )}
-              <h2 className="section-title">Subscriptions on this Mac</h2>
+              <h2 className="section-title">Other subscriptions</h2>
               <div className="subscription-grid">
-                <GrokBotUsage display={limitDisplay} />
                 <CursorUsage
                   active={connected}
                   display={limitDisplay}
@@ -1710,7 +1774,7 @@ export default function App() {
       )}
       {selected && (
         <AccountModal
-          account={accounts.find((a) => a.id === selected.id) || selected}
+          account={pool.find((a) => a.id === selected.id) || selected}
           reveal={reveal}
           close={() => setSelected(null)}
           update={updateAccount}

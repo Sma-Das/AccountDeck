@@ -2,6 +2,7 @@ import { useEffect, useId, useRef } from 'react';
 import type { ReactNode } from 'react';
 import { X } from 'lucide-react';
 import { info, relative } from '../types';
+import { hasIcon, ProviderIcon } from './icons';
 import type { Window } from '../types';
 
 export type Tone = 'green' | 'yellow' | 'red' | 'muted';
@@ -48,17 +49,19 @@ export function Logo({ size = 32 }: { size?: number }) {
 export function Brand({
   provider,
   small = false,
+  icon,
 }: {
   provider: string;
   small?: boolean;
+  icon?: string;
 }) {
-  const p = info(provider);
   return (
     <span
       className={`provider-mark ${small ? 'small' : ''} ${provider}`}
       aria-hidden="true"
     >
-      {p.mark}
+      <ProviderIcon provider={icon || provider} size={small ? 16 : 22} />
+      {!hasIcon(icon || provider) && info(provider).mark}
     </span>
   );
 }
