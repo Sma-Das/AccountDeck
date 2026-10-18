@@ -846,6 +846,37 @@ test('Cursor subscription routes require a console session and keep credentials 
   assert.equal((await f.request('/cursor')).data.connected, false);
 });
 
+test('a custom domain can be pinned beside the MagicDNS origin', async (t) => {
+  const magic = 'https://console.example.ts.net:8443';
+  const custom = 'https://account.example.com';
+  const { request } = await fixture(t, null, {
+    publicOrigin: `${magic}, ${custom}`,
+  });
+  for (const origin of [magic, custom]) {
+    const login = await request(
+      '/session',
+      'POST',
+      { baseUrl: 'http://proxy.local:8317', key: 'management-secret' },
+      { Origin: origin },
+    );
+    assert.equal(login.status, 200);
+    assert.match(login.headers.get('set-cookie'), /; Secure/);
+  }
+  for (const origin of [
+    'https://attacker.example',
+    'http://account.example.com',
+    'https://account.example.com:8443',
+  ])
+    assert.equal(
+      (await request('/session', 'GET', undefined, { Origin: origin })).status,
+      403,
+    );
+  assert.throws(
+    () => createApp({ publicOrigin: `${magic},ftp://account.example.com` }),
+    /HTTP or HTTPS origins/,
+  );
+});
+
 test('GitHub workspace sessions are separate from proxy authentication and use secure cookies', async (t) => {
   const githubCalls = [];
   const { request, login } = await fixture(t, null, {

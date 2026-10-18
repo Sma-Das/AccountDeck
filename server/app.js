@@ -47,14 +47,21 @@ export function createApp({
   persistDefaultAutomation,
   githubRequest = null,
 } = {}) {
-  // Pin the browser origin when an HTTPS reverse proxy rewrites Host.
-  const externalOrigin = publicOrigin ? new URL(publicOrigin).origin : null;
-  if (
-    externalOrigin &&
-    !['http:', 'https:'].includes(new URL(externalOrigin).protocol)
-  )
-    throw new Error('CONSOLE_ORIGIN must be an HTTP or HTTPS origin.');
-  const secureCookies = externalOrigin?.startsWith('https://') || false;
+  // Pin browser origins when HTTPS reverse proxies rewrite Host. A
+  // comma-separated list lets a custom domain sit beside MagicDNS.
+  const externalOrigins = (publicOrigin || '')
+    .split(',')
+    .map((value) => value.trim())
+    .filter(Boolean)
+    .map((value) => {
+      const url = new URL(value);
+      if (!['http:', 'https:'].includes(url.protocol))
+        throw new Error('CONSOLE_ORIGIN must list HTTP or HTTPS origins.');
+      return url.origin;
+    });
+  const secureCookies =
+    externalOrigins.length > 0 &&
+    externalOrigins.every((origin) => origin.startsWith('https://'));
   const app = express();
   const cursor = createCursorTracker({
     stateFile: cursorStateFile,
@@ -117,8 +124,8 @@ export function createApp({
       try {
         const origin = new URL(req.get('Origin'));
         if (
-          externalOrigin
-            ? origin.origin !== externalOrigin
+          externalOrigins.length
+            ? !externalOrigins.includes(origin.origin)
             : origin.host !== req.get('Host')
         )
           return res
