@@ -241,8 +241,168 @@ test('T3 custom provider homes are discovered without loading or changing T3 cre
   const path = join(userdata, 'settings.json');
   await writeFile(path, JSON.stringify(settings));
   const sources = await discoverNativeSources({ home, env: {} });
-  assert.equal(sources.length, 5);
+  assert.equal(sources.length, 6);
+  const antigravity = sources.find((s) => s.kind === 'antigravity');
+  assert.equal(antigravity.home, join(home, '.gemini', 'antigravity-cli'));
+  assert.equal(antigravity.binary, 'agy');
   assert.equal(sources.at(-1).home, join(home, 'claude-work'));
   assert.equal(sources.at(-1).binary, 'work-claude');
   assert.deepEqual(JSON.parse(await readFile(path, 'utf8')), settings);
+});
+
+const antigravitySource = {
+  id: 'antigravity-keychain',
+  kind: 'antigravity',
+  label: 'Antigravity CLI',
+};
+const antigravityCredentials = {
+  auth_method: 'consumer',
+  id_token: token({ email: 'google@example.com', sub: 'google-account-1' }),
+  token: {
+    access_token: 'google-access',
+    refresh_token: 'google-refresh-secret',
+    token_type: 'Bearer',
+    expiry: '2033-05-18T00:33:20-03:00',
+  },
+};
+
+test('Antigravity reads the scoped Keychain entry and decodes Go keyring credentials', async () => {
+  for (const raw of [
+    JSON.stringify(antigravityCredentials),
+    `go-keyring-base64:${Buffer.from(JSON.stringify(antigravityCredentials)).toString('base64')}`,
+  ]) {
+    const [record] = await readNativeSource(antigravitySource, {
+      platform: 'darwin',
+      execImpl: async (binary, args) => {
+        assert.equal(binary, '/usr/bin/security');
+        assert.deepEqual(args, [
+          'find-generic-password',
+          '-s',
+          'gemini',
+          '-a',
+          'antigravity',
+          '-w',
+        ]);
+        return { stdout: `${raw}\n` };
+      },
+    });
+    assert.equal(record.type, 'antigravity');
+    assert.equal(record.access_token, 'google-access');
+    assert.equal(record.email, 'google@example.com');
+    assert.equal(record.sub, 'google-account-1');
+    assert.equal(record.expired, '2033-05-18T03:33:20.000Z');
+    assert.equal(record.refresh_token, '');
+    assert.ok(!JSON.stringify(record).includes('google-refresh-secret'));
+    assert.ok(
+      !JSON.stringify(record).includes(antigravityCredentials.id_token),
+    );
+  }
+  for (const auth_method of ['enterprise', 'api_key'])
+    assert.deepEqual(
+      nativeRecords(antigravitySource, {
+        ...antigravityCredentials,
+        auth_method,
+      }),
+      [],
+    );
+  assert.deepEqual(nativeRecords(antigravitySource, null), []);
+  assert.throws(
+    () =>
+      nativeRecords(antigravitySource, {
+        ...antigravityCredentials,
+        token: { ...antigravityCredentials.token, expiry: 'invalid' },
+      }),
+    /valid token expiry/,
+  );
+});
+
+test('Antigravity uses its fallback file only when the Keychain item is absent', async (t) => {
+  const home = await directory(t);
+  const profile = { ...antigravitySource, home };
+  const path = join(home, 'antigravity-oauth-token');
+  await writeFile(path, JSON.stringify(antigravityCredentials));
+  const options = {
+    platform: 'darwin',
+    execImpl: async () => {
+      throw Object.assign(new Error(), { code: 44 });
+    },
+  };
+  assert.equal(
+    (await readNativeSource(profile, options))[0].access_token,
+    'google-access',
+  );
+  assert.equal(
+    (await readNativeSource(profile, { platform: 'linux' }))[0].email,
+    'google@example.com',
+  );
+  for (const execImpl of [
+    async () => {
+      throw new Error('secret command output');
+    },
+    async () => ({ stdout: 'go-keyring-base64:invalid-secret-data' }),
+  ]) {
+    await assert.rejects(
+      readNativeSource(profile, { ...options, execImpl }),
+      (error) => {
+        assert.match(error.message, /Could not read/);
+        assert.ok(!error.message.includes('secret'));
+        return true;
+      },
+    );
+  }
+  await rm(path);
+  assert.deepEqual(await readNativeSource(profile, options), []);
+});
+
+test('Antigravity sync refreshes through agy, preserves controls, and cleans up owned exports', async (t) => {
+  const authDir = await directory(t);
+  const profile = { ...antigravitySource, binary: 'agy' };
+  let data = antigravityCredentials;
+  const options = {
+    authDir,
+    sources: [profile],
+    readSource: async () => nativeRecords(profile, data),
+    now: () => Date.parse('2033-05-18T03:30:00Z'),
+    refresh: async (s) => {
+      assert.equal(s.binary, 'agy');
+      data = {
+        ...data,
+        token: {
+          ...data.token,
+          access_token: 'renewed',
+          expiry: '2033-05-18T04:30:00Z',
+        },
+      };
+    },
+  };
+  const result = await syncNativeAuth(options);
+  assert.equal(result.accounts.length, 1);
+  assert.equal(result.accounts[0].source, 'Antigravity CLI');
+  assert.equal(result.accounts[0].expired, false);
+  const path = join(authDir, result.accounts[0].name);
+  const saved = JSON.parse(await readFile(path, 'utf8'));
+  assert.equal(saved.access_token, 'renewed');
+  assert.equal(saved.refresh_token, '');
+  await writeFile(
+    path,
+    JSON.stringify({ ...saved, priority: 12, disabled: true }),
+  );
+  await syncNativeAuth(options);
+  const updated = JSON.parse(await readFile(path, 'utf8'));
+  assert.equal(updated.priority, 12);
+  assert.equal(updated.disabled, true);
+  assert.equal((await stat(path)).mode & 0o777, 0o600);
+  await syncNativeAuth({
+    ...options,
+    readSource: async () => {
+      throw new Error('Read failed');
+    },
+  });
+  assert.ok((await readdir(authDir)).includes(result.accounts[0].name));
+  await syncNativeAuth({ ...options, readSource: async () => [] });
+  assert.deepEqual(await readdir(authDir), []);
+  await syncNativeAuth(options);
+  await writeFile(join(authDir, 'manual.json'), '{}');
+  await removeNativeAuth(authDir);
+  assert.deepEqual(await readdir(authDir), ['manual.json']);
 });
