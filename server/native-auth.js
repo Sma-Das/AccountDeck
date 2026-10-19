@@ -60,6 +60,12 @@ export async function discoverNativeSources({
       binary: 'grok',
     },
     {
+      kind: 'antigravity',
+      label: 'Antigravity CLI',
+      home: join(home, '.gemini', 'antigravity-cli'),
+      binary: 'agy',
+    },
+    {
       kind: 'opencode',
       label: 'OpenCode',
       home: join(
@@ -163,6 +169,24 @@ export function nativeRecords(source, data, account = {}) {
           }),
         ].filter(Boolean);
   }
+  if (source.kind === 'antigravity') {
+    // Enterprise and API-key sessions are not consumer Antigravity OAuth.
+    if (data?.auth_method && data.auth_method !== 'consumer') return [];
+    const claims = jwt(data?.id_token || '');
+    const oauth = data?.token;
+    if (!oauth?.access_token) return [];
+    const expires = Date.parse(oauth.expiry);
+    if (!Number.isFinite(expires))
+      throw new Error('Antigravity CLI did not report a valid token expiry.');
+    return [
+      record(
+        'antigravity',
+        oauth?.access_token,
+        { email: claims.email || '', sub: claims.sub || '' },
+        expires,
+      ),
+    ].filter(Boolean);
+  }
   if (source.kind === 'opencode') {
     const records = [];
     if (data?.openai?.type === 'oauth')
@@ -181,6 +205,39 @@ export async function readNativeSource(
   source,
   { home = homedir(), platform = process.platform, execImpl = exec } = {},
 ) {
+  if (source.kind === 'antigravity') {
+    let credentials;
+    if (platform === 'darwin') {
+      let raw;
+      try {
+        ({ stdout: raw } = await execImpl(
+          '/usr/bin/security',
+          ['find-generic-password', '-s', 'gemini', '-a', 'antigravity', '-w'],
+          { timeout: 10000, maxBuffer: 1024 * 1024 },
+        ));
+      } catch (error) {
+        if (error.code !== 44)
+          throw new Error('Could not read the Antigravity CLI Keychain login.');
+      }
+      if (raw !== undefined) {
+        try {
+          raw = raw.trim();
+          const prefix = 'go-keyring-base64:';
+          credentials = JSON.parse(
+            raw.startsWith(prefix)
+              ? Buffer.from(raw.slice(prefix.length), 'base64').toString('utf8')
+              : raw,
+          );
+          if (!credentials || typeof credentials !== 'object')
+            throw new Error();
+        } catch {
+          throw new Error('Could not read Antigravity CLI credential data.');
+        }
+      }
+    }
+    credentials ??= await json(join(source.home, 'antigravity-oauth-token'));
+    return nativeRecords(source, credentials);
+  }
   if (source.kind !== 'claude')
     return nativeRecords(source, await json(join(source.home, 'auth.json')));
   let credentials;
@@ -259,7 +316,10 @@ export async function syncNativeAuth({
     }
   }
   for (const name of await readdir(authDir)) {
-    if (!/^native-(claude|codex|xai)-[a-f0-9]{16}\.json$/.test(name)) continue;
+    if (
+      !/^native-(claude|codex|xai|antigravity)-[a-f0-9]{16}\.json$/.test(name)
+    )
+      continue;
     const previous = await json(join(authDir, name));
     if (previous?.native_source?.owner !== marker) continue;
     if (!records.has(name) && !failed.has(previous.native_source.id))
@@ -309,7 +369,10 @@ export async function removeNativeAuth(authDir) {
     throw error;
   }
   for (const name of names) {
-    if (!/^native-(claude|codex|xai)-[a-f0-9]{16}\.json$/.test(name)) continue;
+    if (
+      !/^native-(claude|codex|xai|antigravity)-[a-f0-9]{16}\.json$/.test(name)
+    )
+      continue;
     if ((await json(join(authDir, name)))?.native_source?.owner === marker)
       await unlink(join(authDir, name));
   }

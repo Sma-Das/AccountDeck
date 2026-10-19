@@ -85,16 +85,16 @@ For a manual connection:
 
 ### Reuse existing native sign-ins
 
-If you already use Claude Code, Codex, Grok, or OpenCode on this Mac, reuse those local logins:
+If you already use Claude Code, Codex, Grok, Antigravity CLI, or OpenCode on this Mac, reuse those local logins:
 
 ```sh
 npm run native:install
 npm run native:status
 ```
 
-The bridge discovers Codex's `~/.codex/auth.json`, Claude Code's macOS Keychain entry, Grok's `~/.grok/auth.json`, and OpenCode's local OpenAI OAuth login. It also discovers custom Claude and Codex homes configured in T3 Code's provider instances. Native sources appear in the console beside each account.
+The bridge discovers Codex's `~/.codex/auth.json`, Claude Code's macOS Keychain entry, Grok's `~/.grok/auth.json`, Antigravity CLI's macOS Keychain entry, and OpenCode's local OpenAI OAuth login. Antigravity reads the `gemini` service's `antigravity` account, with `~/.gemini/antigravity-cli/antigravity-oauth-token` as a fallback when the Keychain entry is absent. Consumer Google OAuth logins are supported; enterprise and API-key sessions are skipped. It also discovers custom Claude and Codex homes configured in T3 Code's provider instances. Native sources appear in the console beside each account.
 
-The bridge syncs once a minute into CLIProxyAPI's `~/.cli-proxy-api` credential directory. It exports access tokens and account metadata. Refresh tokens stay with the original CLI. Near expiry, Claude Code, Codex, and Grok refresh their own logins through metadata-only CLI commands. OpenCode token updates are picked up from its credential store. No model prompt is sent during discovery or refresh. Proxy priorities and pause settings are preserved when tokens change.
+The bridge syncs once a minute into CLIProxyAPI's `~/.cli-proxy-api` credential directory. It exports access tokens and account metadata. Refresh tokens stay with the original CLI. Near expiry, Claude Code, Codex, Grok, and Antigravity CLI refresh their own logins through metadata-only CLI commands. Antigravity uses `agy models`. OpenCode token updates are picked up from its credential store. No model prompt is sent during discovery or refresh. Proxy priorities and pause settings are preserved when tokens change.
 
 Use `CLIPROXY_NATIVE_AUTH_DIR=/absolute/auth/directory npm run native:install` for a proxy configured with another credential directory. `npm run native:sync` performs a single sync. `npm run native:uninstall` stops the bridge and removes its exported credentials. The installed bridge lives outside the checkout and starts at login. Its status and logs are under `~/Library/Application Support/CLIProxy Native Auth/`.
 

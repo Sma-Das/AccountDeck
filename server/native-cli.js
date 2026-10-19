@@ -38,7 +38,9 @@ export function refreshNativeLogin(
             ? source.home === join(homedir(), '.claude')
               ? {}
               : { CLAUDE_CONFIG_DIR: source.home }
-            : { GROK_HOME: source.home }),
+            : source.kind === 'grok'
+              ? { GROK_HOME: source.home }
+              : {}),
       },
       stdio: ['pipe', 'pipe', 'pipe'],
     });
@@ -71,7 +73,7 @@ export function refreshNativeLogin(
       ),
     );
     child.on('exit', (code) => {
-      if (source.kind === 'grok' && code === 0) finish();
+      if (['grok', 'antigravity'].includes(source.kind) && code === 0) finish();
       else finish(new Error(`${source.label} could not refresh its login.`));
     });
     child.stderr.on('data', () => {});

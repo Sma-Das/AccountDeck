@@ -4,6 +4,33 @@ import { EventEmitter } from 'node:events';
 import { PassThrough, Writable } from 'node:stream';
 import { refreshNativeLogin } from './native-cli.js';
 
+test('Antigravity refresh lists models without sending a prompt or Grok home override', async () => {
+  const child = new EventEmitter();
+  child.stdout = new PassThrough();
+  child.stderr = new PassThrough();
+  child.stdin = new Writable({
+    write: (_, __, done) => done(new Error('Unexpected input')),
+  });
+  child.kill = () => true;
+  await refreshNativeLogin(
+    {
+      kind: 'antigravity',
+      binary: 'agy',
+      home: '/native/agy',
+      label: 'Antigravity CLI',
+    },
+    {
+      spawnImpl: (binary, args, options) => {
+        assert.equal(binary, 'agy');
+        assert.deepEqual(args, ['models']);
+        assert.equal(options.env.GROK_HOME, process.env.GROK_HOME);
+        queueMicrotask(() => child.emit('exit', 0));
+        return child;
+      },
+    },
+  );
+});
+
 test('Claude refresh sends only initialization and usage control requests, never a model prompt', async () => {
   const messages = [];
   const child = new EventEmitter();
